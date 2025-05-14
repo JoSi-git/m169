@@ -58,6 +58,7 @@ sudo mkdir -p "$INSTALL_DIR/logs"
 echo -e "\033[1mCopying Docker files from $SCRIPT_DIR/Docker to $INSTALL_DIR...\033[0m" | tee -a "$LOG_FILE"
 sudo cp "$SCRIPT_DIR/Docker/docker-compose.yml" "$INSTALL_DIR/"
 sudo cp "$SCRIPT_DIR/Docker/Dockerfile" "$INSTALL_DIR/"
+sudo cp "$SCRIPT_DIR/Docker/.env" "$INSTALL_DIR/"
 
 # Clone Moodle repository
 echo -e "\033[1mCloning Moodle repository...\033[0m" | tee -a "$LOG_FILE"
