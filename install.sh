@@ -76,7 +76,13 @@ moodle_cfg="/var/www/html/config.php"
 cp "$moodle_cfg" "${moodle_cfg}.bak"
 sed -i "s|\\$CFG->wwwroot\s*=.*|\\$CFG->wwwroot = 'http://localhost:8080';|g" "$moodle_cfg"
 
+# Adding warning banner into old instance
+f="/var/www/html/theme/boost/templates/columns2.mustache"
+cp "$f" "$f.bak"
+awk '/{{> theme_boost\/navbar }}/ {print; print "<div style=\"background-color: #f8d7da; color: #721c24; text-align: center; padding: 20px; font-weight: bold; font-size: 24px;\"><br>Diese Moodle-Seite ist <strong>veraltet</strong> und wird <strong>nicht mehr gewartet</strong>. Bitte verwende stattdessen <a href=\"http://localhost:80\" style=\"color: #721c24; font-weight: bold; text-decoration: none;\">http://localhost:80</a></div>"; next}1' "$f.bak" > "$f"
+
 sudo systemctl reload apache2
+
 
 # Final message and Docker Compose instructions (English)
 END_MSG="
