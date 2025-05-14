@@ -21,21 +21,6 @@ echo
 read -p "Do you want to perform system updates? (Y/n): " update_choice
 update_choice=${update_choice:-Y}
 
-# Load environment variables
-if [[ -f .env ]]; then
-    source .env
-else
-    echo "No .env file found. Exiting." | tee -a "$LOG_FILE"
-    exit 1
-fi
-
-# Creating required directories in $INSTALL_DIR
-echo "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
-sudo mkdir -p "$INSTALL_DIR/moodle"
-sudo mkdir -p "$INSTALL_DIR/moodledata"
-sudo mkdir -p "$INSTALL_DIR/db_data"
-sudo mkdir -p "$INSTALL_DIR/logs"
-
 # Perform system update if chosen
 if [[ "$update_choice" =~ ^[Yy]$ ]]; then
     echo "Performing system update..." | tee -a "$LOG_FILE"
@@ -45,13 +30,34 @@ else
     echo "Skipping system update." | tee -a "$LOG_FILE"
 fi
 
-# Clone Moodle repository (This is mandatory)
+
+# Load environment variables
+if [[ -f .env ]]; then
+    source .env
+else
+    echo "No .env file found. Exiting." | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+
+# Creating required directories in $INSTALL_DIR
+echo "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
+sudo mkdir -p "$INSTALL_DIR/moodle"
+sudo mkdir -p "$INSTALL_DIR/moodledata"
+sudo mkdir -p "$INSTALL_DIR/db_data"
+sudo mkdir -p "$INSTALL_DIR/logs"
+
+
+# Copies the Docker files (docker-compose.yml and Dockerfile) from the script directory to the installation directory
+echo "Copying Docker files from $SCRIPT_DIR to $INSTALL_DIR..." | tee -a "$LOG_FILE"
+sudo cp "$SCRIPT_DIR/Docker/docker-compose.yml" "$INSTALL_DIR/"
+sudo cp "$SCRIPT_DIR/Docker/Dockerfile" "$INSTALL_DIR/"          
+
+
+# Clone Moodle repository
 echo "Cloning Moodle repository..." | tee -a "$LOG_FILE"
 sudo git clone -b MOODLE_403_STABLE https://github.com/moodle/moodle.git "$INSTALL_DIR/moodle"
 
-# Copy current directory contents (Docker and other files) into /opt
-echo "Copying Docker and other files from $SCRIPT_DIR to $INSTALL_DIR..." | tee -a "$LOG_FILE"
-sudo cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR/"
 
 # Ask whether the existing MySQL database should be rebuilt or kept
 read -p "Do you want to rebuild the MySQL database? (Y/n): " rebuild_db
@@ -79,6 +85,10 @@ if [[ "$rebuild_db" =~ ^[Yy]$ ]]; then
 else
     echo "Skipping database rebuild. Keeping the existing database." | tee -a "$LOG_FILE"
 fi
+
+
+# Changing port configuration
+
 
 # Final message and Docker Compose instructions (English)
 END_MSG="
