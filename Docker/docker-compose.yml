@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.6
+    container_name: moodle-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+
+  moodle:
+    build: .
+    container_name: moodle-web
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      PHP_INI-upload_max_filesize: ${PHP_INI_upload_max_filesize}
+      PHP_INI-post_max_size: ${PHP_INI_post_max_size}
+    volumes:
+      - ./moodle:/var/www/html
+      - ./moodledata:/var/www/moodledata
+    depends_on:
+      - db
+
+volumes:
+  db_data:
