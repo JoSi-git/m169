@@ -12,6 +12,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
+      - ./mariadb_logs:/var/log/mysql
 
   moodle:
     build: .
@@ -25,6 +26,9 @@ services:
     volumes:
       - ./moodle:/var/www/html
       - ./moodledata:/var/www/moodledata
+      - ./moodle_logs:/var/log/apache2    # Apache-Access+Error-Logs
+      - ./moodle_app_logs:/var/moodledata/logs  # Moodle-App-Logs (wenn du file-based Logging nutzt)
+
     depends_on:
       - db
 
