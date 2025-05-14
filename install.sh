@@ -81,7 +81,8 @@ else
 fi
 
 # Final message and Docker Compose instructions (English)
-END_MSG="-------------------------------------------
+END_MSG="
++-----------------------------------------+
 |     Installation Complete               |
 |-----------------------------------------|
 | Moodle Docker setup complete!           |
@@ -93,14 +94,14 @@ END_MSG="-------------------------------------------
 | 3. Check status:                        |
 |    docker-compose ps                    |
 | 4. Access Moodle:                       |
-|    http://localhost:8080                |
+|    http://localhost:80                  |
 | 5. Stop containers:                     |
 |    docker-compose down                  |
 |                                         |
 | Note: Old infrastructure remains        |
-| accessible.                             |
-| Installation log at '$LOG_FILE'.         |
--------------------------------------------"
+| accessible under http://localhost:8080  |
+| Installation log at '$LOG_FILE'.        |
++-----------------------------------------+"
 
 # Output the message to the console and append to the log file
 echo "$END_MSG" | tee -a "$LOG_FILE"
