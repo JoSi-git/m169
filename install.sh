@@ -53,6 +53,9 @@ sudo mkdir -p "$INSTALL_DIR/moodle"
 sudo mkdir -p "$INSTALL_DIR/moodledata"
 sudo mkdir -p "$INSTALL_DIR/db_data"
 sudo mkdir -p "$INSTALL_DIR/logs"
+sudo mkdir -p "$INSTALL_DIR/logs/moodle"
+sudo mkdir -p "$INSTALL_DIR/logs/apache"
+sudo mkdir -p "$INSTALL_DIR/logs/mariadb"
 
 # Copy Docker files
 echo -e "\033[1mCopying Docker files from $SCRIPT_DIR/Docker to $INSTALL_DIR...\033[0m" | tee -a "$LOG_FILE"
