@@ -65,10 +65,7 @@ sudo git clone -b MOODLE_403_STABLE https://github.com/moodle/moodle.git "$INSTA
 
 # Changing port configuration
 echo -e "\033[1mAdjusting Apache ports and Moodle config...\033[0m" | tee -a "$LOG_FILE"
-cp /etc/apache2/ports.conf /etc/apache2/ports.conf.bak
-if ! grep -q '^Listen 8080' /etc/apache2/ports.conf; then
-  echo 'Listen 8080' | sudo tee -a /etc/apache2/ports.conf
-fi
+sed -i 's/^\s*Listen\s\+80$/Listen 8080/' /etc/apache2/ports.conf
 
 site_conf="/etc/apache2/sites-available/000-default.conf"
 cp "$site_conf" "${site_conf}.bak"
