@@ -7,3 +7,36 @@
 ## 🔍 1 Ausgangslage
 
 Eine ältere Moodle-Instanz muss auf die aktuelle Version als Docker-Container migriert werden, inklusive aller Daten. Dies erfolgt im Rahmen des Modulprojekts und wird in mehreren Schritten durchgeführt.
+
+## 2 Anforderungen (Requirements)
+
+### Git installieren  
+Sicherstellen, dass Git auf dem System installiert ist:
+```bash
+sudo apt update
+sudo apt install git
+```
+
+### Git-Repository klonen 
+Klonen eines Repositories (beim ersten Mal):
+```bash
+git clone <repository-url>
+```
+
+### Repository aktualisieren:
+```bash
+git pull
+```
+
+## 🛠️ 3 Troubleshooting
+
+### Fehlende Berechtigung für `install.sh`  
+Wenn beim Ausführen von `install.sh` ein Berechtigungsfehler auftritt, stelle sicher, dass die Datei ausführbar ist:
+```bash
+chmod +x install.sh
+```
+
+Danach kann das Skript wie folgt ausgeführt werden:
+```bash
+./install.sh
+```
