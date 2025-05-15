@@ -127,10 +127,12 @@ if ! grep -qE "^alias moodleup=" "$SHELL_RC"; then
         echo "alias moodlebackup='echo \"[WIP] moodlebackup: This function is still under development. For details, see: https://github.com/JoSi-git/m169\"'"
     } >> "$SHELL_RC"
     echo "Aliases 'moodleup', 'moodledown', and 'moodlebackup' added to $SHELL_RC" | tee -a "$LOG_FILE"
-    source "$SHELL_RC"
 else
     echo "Aliases already exist in $SHELL_RC - skipping addition." | tee -a "$LOG_FILE"
 fi
+
+# Note on activation
+echo "➡️  Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
 
 # Final message and Docker Compose instructions
 cat <<EOF | tee -a "$LOG_FILE"
@@ -141,12 +143,12 @@ cat <<EOF | tee -a "$LOG_FILE"
 | Moodle Docker setup complete!                                                                     |
 |                                                                                                   |
 | => Start Moodle:                                                                                  |
-|   cd /opt/moodle-docker && docker-compose up -d                                                   |
-|   -> Status: docker-compose ps                                                                    |
+|   cd /opt/moodle-docker && docker compose up -d                                                   |
+|   -> Status: docker compose ps                                                                    |
 |   -> Access: http://localhost:80                                      ■■          .               |
 |                                                                 ■■ ■■ ■■           ==             |
 | => Stop:                                                     ■■ ■■ ■■ ■■ ■■         ===           |
-|   docker-compose down                                     /"""""""""""""""""""\____/ ===          |
+|   docker compose down                                     /"""""""""""""""""""\____/ ===          |
 |                                                 ~ ~~~ ~~ {                          /~ === ~~ ~~~ |
 | => You can also use aliases for convenience:              \                        /      -       |
 |   moodleup     -> Starts & opens Moodle                    \_______ O           __/               |
