@@ -127,12 +127,10 @@ if ! grep -qE "^alias moodleup=" "$SHELL_RC"; then
         echo "alias moodlebackup='echo \"[WIP] moodlebackup: This function is still under development. For details, see: https://github.com/JoSi-git/m169\"'"
     } >> "$SHELL_RC"
     echo "Aliases 'moodleup', 'moodledown', and 'moodlebackup' added to $SHELL_RC" | tee -a "$LOG_FILE"
+    source ~/.bashrc
 else
     echo "Aliases already exist in $SHELL_RC - skipping addition." | tee -a "$LOG_FILE"
 fi
-
-# Note for activation
-print_cmsg "Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
 
 # Final message and Docker Compose instructions
 cat <<EOF | tee -a "$LOG_FILE"
@@ -165,3 +163,4 @@ cat <<EOF | tee -a "$LOG_FILE"
 
 EOF
 
+exit
