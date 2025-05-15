@@ -10,7 +10,7 @@ INSTALL_DIR="/opt/moodle-docker"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 SCRIPT_DIR="$(pwd)"
 ENV_FILE="$SCRIPT_DIR/Docker/.env"
-SHELL_RC="$HOME/.bashrc"
+SHELL_RC="/home/$SUDO_USER/.bashrc"
 Ver="V1.0"
 
 # Function: Prints the given text in bold on the console
