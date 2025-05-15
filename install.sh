@@ -23,6 +23,9 @@ print_cmsg() {
   fi
 }
 
+# Creating install log directory
+mkdir -p "$INSTALL_DIR/logs"
+
 # Display title
 clear
 cat <<'EOF' | tee -a "$LOG_FILE"
@@ -70,24 +73,23 @@ fi
 
 # Creating required directories in $INSTALL_DIR
 print_cmsg "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
-sudo mkdir -p "$INSTALL_DIR/moodle"
-sudo mkdir -p "$INSTALL_DIR/moodledata"
-sudo mkdir -p "$INSTALL_DIR/db_data"
-sudo mkdir -p "$INSTALL_DIR/dumps"
-sudo mkdir -p "$INSTALL_DIR/logs"
-sudo mkdir -p "$INSTALL_DIR/logs/moodle"
-sudo mkdir -p "$INSTALL_DIR/logs/apache"
-sudo mkdir -p "$INSTALL_DIR/logs/mariadb"
+mkdir -p "$INSTALL_DIR/moodle"
+mkdir -p "$INSTALL_DIR/moodledata"
+mkdir -p "$INSTALL_DIR/db_data"
+mkdir -p "$INSTALL_DIR/dumps"
+mkdir -p "$INSTALL_DIR/logs/moodle"
+mkdir -p "$INSTALL_DIR/logs/apache"
+mkdir -p "$INSTALL_DIR/logs/mariadb"
 
 # Copy Docker files
 print_cmsg "Copying Docker files from $SCRIPT_DIR/Docker to $INSTALL_DIR..." | tee -a "$LOG_FILE"
-sudo cp "$SCRIPT_DIR/Docker/docker-compose.yml" "$INSTALL_DIR/"
-sudo cp "$SCRIPT_DIR/Docker/Dockerfile" "$INSTALL_DIR/"
-sudo cp "$SCRIPT_DIR/Docker/.env" "$INSTALL_DIR/"
+cp "$SCRIPT_DIR/Docker/docker-compose.yml" "$INSTALL_DIR/"
+cp "$SCRIPT_DIR/Docker/Dockerfile" "$INSTALL_DIR/"
+cp "$SCRIPT_DIR/Docker/.env" "$INSTALL_DIR/"
 
 # Clone Moodle repository
 print_cmsg "Cloning Moodle repository..." | tee -a "$LOG_FILE"
-sudo git clone -b MOODLE_403_STABLE https://github.com/moodle/moodle.git "$INSTALL_DIR/moodle"
+git clone -b MOODLE_403_STABLE https://github.com/moodle/moodle.git "$INSTALL_DIR/moodle"
 
 # Changing port configuration
 print_cmsg "Adjusting Apache ports and Moodle config..." | tee -a "$LOG_FILE"
@@ -106,7 +108,7 @@ f="/var/www/html/theme/boost/templates/columns2.mustache"
 cp "$f" "$f.bak"
 awk '/{{> theme_boost\/navbar }}/ {print; print "<div style=\"background-color: #f8d7da; color: #721c24; text-align: center; padding: 20px; font-weight: bold; font-size: 24px;\"><br>Diese Moodle-Seite ist <strong>veraltet</strong> und wird <strong>nicht mehr gewartet</strong>. Bitte verwende stattdessen <a href=\"http://localhost:80\" style=\"color: #721c24; font-weight: bold; text-decoration: none;\">http://localhost:80</a></div>"; next}1' "$f.bak" > "$f"
 
-sudo systemctl reload apache2
+systemctl reload apache2
 
 # Moodle migration
 
