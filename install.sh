@@ -128,7 +128,7 @@ if ! grep -qE "^alias moodleup=" "$SHELL_RC"; then
     } >> "$SHELL_RC"
     echo "Aliases 'moodleup', 'moodledown', and 'moodlebackup' added to $SHELL_RC" | tee -a "$LOG_FILE"
 else
-    echo "Aliases already exist in $SHELL_RC - skipping addition." | tee -a "$LOG_FILE"
+    print_cmsg "Aliases already exist in $SHELL_RC - skipping addition." | tee -a "$LOG_FILE"
 fi
 
 # Note on activation
