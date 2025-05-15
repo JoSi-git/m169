@@ -32,6 +32,13 @@ cat <<'EOF'
 
 EOF
 
+# Check if the script is running as root
+if [[ "$EUID" -ne 0 ]]; then
+  echo "This script must be run with sudo or as root." >&2
+  exec sudo "$0" "$@"
+  exit 1
+fi
+
 # Ask if system updates should be performed
 read -p "Do you want to perform system updates? (Y/n): " update_choice
 update_choice=${update_choice:-Y}
