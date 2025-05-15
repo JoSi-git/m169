@@ -11,7 +11,7 @@ LOG_FILE="$INSTALL_DIR/logs/install.log"
 SCRIPT_DIR="$(pwd)"
 ENV_FILE="$SCRIPT_DIR/Docker/.env"
 SHELL_RC="$HOME/.bashrc"
-Version="V1.0"
+Ver="V1.0"
 
 # Function: Prints the given text in bold on the console
 print_cmsg() {
@@ -142,25 +142,25 @@ cat <<EOF | tee -a "$LOG_FILE"
 |---------------------------------------------------------------------------------------------------|
 | Moodle Docker setup complete!                                                                     |
 |                                                                                                   |
-| ➤ Start Moodle:                                                                                  |
+| => Start Moodle:                                                                                  |
 |   cd /opt/moodle-docker && docker-compose up -d                                                   |
-|   → Status: docker-compose ps                                                                     |
-|   → Access: http://localhost:80                                       ■■          .               |
+|   -> Status: docker-compose ps                                                                    |
+|   -> Access: http://localhost:80                                       ■■          .              |
 |                                                                 ■■ ■■ ■■           ==             |
-| ➤ Stop:                                                     ■■ ■■ ■■ ■■ ■■         ===           |
+| => Stop:                                                     ■■ ■■ ■■ ■■ ■■         ===           |
 |   docker-compose down                                     /"""""""""""""""""""\____/ ===          |
 |                                                   ~~~ ~~ {                          /~ === ~~ ~~~ |
-| ➤ You can also use aliases for convenience:              \                        /      -       |
-|   moodleup     → Starts & opens Moodle                     \_______ O           __/				|
-|   moodledown   → Stops containers                                  \___________/					|
+| => You can also use aliases for convenience:              \                        /      -       |
+|   moodleup     -> Starts & opens Moodle                     \_______ O           __/				|
+|   moodledown   -> Stops containers                                  \___________/					|
 |                                                                                                   |
-| ➤ Start backup:                                       	DJS Moodle Docker Install Script       |
-|   moodlebackup                                                      	$Version                    |
+| => Start backup:                                       	DJS Moodle Docker Install Script        |
+|   moodlebackup                                                      	$Ver                        |
 |   Guide: https://github.com/JoSi-git/m169/readme.md                                               |
 |                                                                                                   |
-| ➤ Legacy system: http://localhost:8080                                                           |
+| => Legacy system: http://localhost:8080                                                           |
 |                                                                                                   |
-| ➤ Log file: $LOG_FILE                                                                            
+| => Log file: $LOG_FILE                                                                            
 +---------------------------------------------------------------------------------------------------+
 
 EOF
