@@ -122,12 +122,12 @@ if ! grep -qE "^alias moodleup=" "$SHELL_RC"; then
     {
         echo ""
         echo "# Moodle Docker aliases"
-        echo "alias moodleup='cd /opt/moodle-docker && docker-compose up -d && docker-compose ps && xdg-open http://localhost'"
-        echo "alias moodledown='cd /opt/moodle-docker && docker-compose down'"
+        echo "alias moodleup='(cd /opt/moodle-docker && docker compose up -d && docker compose ps && xdg-open http://localhost)'"
+        echo "alias moodledown='(cd /opt/moodle-docker && docker compose down)'"
         echo "alias moodlebackup='echo \"[WIP] moodlebackup: This function is still under development. For details, see: https://github.com/JoSi-git/m169\"'"
     } >> "$SHELL_RC"
     echo "Aliases 'moodleup', 'moodledown', and 'moodlebackup' added to $SHELL_RC" | tee -a "$LOG_FILE"
-    source ~/.bashrc
+    source "$SHELL_RC"
 else
     echo "Aliases already exist in $SHELL_RC - skipping addition." | tee -a "$LOG_FILE"
 fi
