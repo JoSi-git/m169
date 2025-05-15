@@ -13,6 +13,11 @@ ENV_FILE="$SCRIPT_DIR/Docker/.env"
 SHELL_RC="$HOME/.bashrc"
 Version="V1.0"
 
+# Function: Prints the given text in bold on the console
+print_cmsg() {
+  echo -e "\e[1m$*\e[0m"
+}
+
 # Display title
 clear
 cat <<'EOF'
@@ -33,24 +38,24 @@ update_choice=${update_choice:-Y}
 
 # Perform system update if chosen
 if [[ "$update_choice" =~ ^[Yy]$ ]]; then
-    echo -e "\033[1mPerforming system update...\033[0m" | tee -a "$LOG_FILE"
+    print_cmsg -e "Performing system update..." | tee -a "$LOG_FILE"
     sudo apt-get update && sudo apt-get upgrade -y
-    echo -e "\033[1mSystem update completed.\033[0m" | tee -a "$LOG_FILE"
+    print_cmsg -e "System update completed." | tee -a "$LOG_FILE"
 else
-    echo -e "\033[1mSkipping system update.\033[0m" | tee -a "$LOG_FILE"
+    print_cmsg -e "Skipping system update." | tee -a "$LOG_FILE"
 fi
 
 # Load environment variables from .env file
 if [[ -f "$ENV_FILE" ]]; then
     source "$ENV_FILE"
-    echo -e "\033[1m.env file found and loaded.\033[0m" | tee -a "$LOG_FILE"
+    print_cmsg -e ".env file found and loaded." | tee -a "$LOG_FILE"
 else
-    echo -e "\033[1mNo .env file found in $SCRIPT_DIR/Docker. Exiting.\033[0m" | tee -a "$LOG_FILE"
+    print_cmsg -e ".env file found in $SCRIPT_DIR/Docker. Exiting." | tee -a "$LOG_FILE"
     exit 1
 fi
 
 # Creating required directories in $INSTALL_DIR
-echo -e "\033[1mCreating required directories in $INSTALL_DIR...\033[0m" | tee -a "$LOG_FILE"
+print_cmsg -e "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
 sudo mkdir -p "$INSTALL_DIR/moodle"
 sudo mkdir -p "$INSTALL_DIR/moodledata"
 sudo mkdir -p "$INSTALL_DIR/db_data"
@@ -60,17 +65,17 @@ sudo mkdir -p "$INSTALL_DIR/logs/apache"
 sudo mkdir -p "$INSTALL_DIR/logs/mariadb"
 
 # Copy Docker files
-echo -e "\033[1mCopying Docker files from $SCRIPT_DIR/Docker to $INSTALL_DIR...\033[0m" | tee -a "$LOG_FILE"
+print_cmsg -e "mCopying Docker files from $SCRIPT_DIR/Docker to $INSTALL_DIR..." | tee -a "$LOG_FILE"
 sudo cp "$SCRIPT_DIR/Docker/docker-compose.yml" "$INSTALL_DIR/"
 sudo cp "$SCRIPT_DIR/Docker/Dockerfile" "$INSTALL_DIR/"
 sudo cp "$SCRIPT_DIR/Docker/.env" "$INSTALL_DIR/"
 
 # Clone Moodle repository
-echo -e "\033[1mCloning Moodle repository...\033[0m" | tee -a "$LOG_FILE"
+print_cmsg -e "Cloning Moodle repository..." | tee -a "$LOG_FILE"
 sudo git clone -b MOODLE_403_STABLE https://github.com/moodle/moodle.git "$INSTALL_DIR/moodle"
 
 # Changing port configuration
-echo -e "\033[1mAdjusting Apache ports and Moodle config...\033[0m" | tee -a "$LOG_FILE"
+print_cmsg -e "Adjusting Apache ports and Moodle config..." | tee -a "$LOG_FILE"
 sed -i 's/^\s*Listen\s\+80$/Listen 8080/' /etc/apache2/ports.conf
 
 site_conf="/etc/apache2/sites-available/000-default.conf"
@@ -88,10 +93,12 @@ awk '/{{> theme_boost\/navbar }}/ {print; print "<div style=\"background-color: 
 
 sudo systemctl reload apache2
 
-# moodle migration
-# Mysql Dump
+# Moodle migration
+
+# Mysql dump
 mysqldump -u root -p$MYSQL_ROOT_PASSWORD > /opt/moodle-docker/moodle_backup.sql
-# copy moodledata
+
+# Copy moodledata
 cp -r /var/www/moodledata /opt/moodle-docker
 
 
@@ -104,13 +111,13 @@ if ! grep -q "alias moodleup=" "$SHELL_RC"; then
         echo "alias moodledown='cd /opt/moodle-docker && docker-compose down'"
         echo "alias moodlebackup='echo \"[WIP] moodlebackup: This function is still under development. For details, see: https://github.com/JoSi-git/m169\"'"
     } >> "$SHELL_RC"
-    echo "Aliases 'moodleup', 'moodledown', and 'moodlebackup' added to $SHELL_RC" | tee -a "$LOG_FILE"
+    print_cmsg "Aliases 'moodleup', 'moodledown', and 'moodlebackup' added to $SHELL_RC" | tee -a "$LOG_FILE"
 else
-    echo "Aliases already exist in $SHELL_RC – skipping addition." | tee -a "$LOG_FILE"
+    print_cmsg "Aliases already exist in $SHELL_RC – skipping addition." | tee -a "$LOG_FILE"
 fi
 
 # Note for activation
-echo "Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
+print_cmsg "Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
 
 # Final message and Docker Compose instructions
 cat <<'EOF'
