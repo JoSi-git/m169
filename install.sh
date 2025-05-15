@@ -15,7 +15,12 @@ Version="V1.0"
 
 # Function: Prints the given text in bold on the console
 print_cmsg() {
-  echo -e "\e[1m$*\e[0m"
+  if [[ "$1" == "-n" ]]; then
+    shift
+    echo -ne "\e[1m$*\e[0m"
+  else
+    echo -e "\e[1m$*\e[0m"
+  fi
 }
 
 # Display title
@@ -40,8 +45,10 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 
 # Ask if system updates should be performed
-read -p "Do you want to perform system updates? (Y/n): " update_choice
+print_cmsg -n "Do you want to perform system updates? (Y/n):"
+read update_choice
 update_choice=${update_choice:-Y}
+
 
 # Perform system update if chosen
 if [[ "$update_choice" =~ ^[Yy]$ ]]; then
@@ -128,6 +135,7 @@ print_cmsg "Run 'source ~/.bashrc' or restart your terminal to activate the new 
 
 # Final message and Docker Compose instructions
 cat <<'EOF' | tee -a "$LOG_FILE"
+
 +---------------------------------------------------------------------------------------------------+
 |                             			Installation Complete!                     					|
 |---------------------------------------------------------------------------------------------------|
@@ -136,13 +144,13 @@ cat <<'EOF' | tee -a "$LOG_FILE"
 | ➤ Start Moodle:                                                               					|
 |   cd /opt/moodle-docker && docker-compose up -d                                					|
 |   → Status: docker-compose ps                                                  					|
-|   → Access: http://localhost:80                           			■■     		.               |
+|   → Access: http://localhost:80                                       ■■     		.               |
 |                                                                 ■■ ■■ ■■       	 ==        		|
-| ➤ Stop:                                    	   			   ■■ ■■ ■■ ■■ ■■ 	     ===      		|
-|   docker-compose down                                   	/"""""""""""""""""""\____/ ===          |
-|                                                 	~~~ ~~ {                          /~ === ~~ ~~~ |
-| ➤ You can also use aliases for convenience:         		\						 /		-     	|
-|   moodleup     → Starts & opens Moodle              		 \_______ O           __/				|
+| ➤ Stop:                                                     ■■ ■■ ■■ ■■ ■■ 	     ===      		|
+|   docker-compose down                                     /"""""""""""""""""""\____/ ===          |
+|                                                   ~~~ ~~ {                          /~ === ~~ ~~~ |
+| ➤ You can also use aliases for convenience:              \                        /		-     	|
+|   moodleup     → Starts & opens Moodle                     \_______ O           __/				|
 |   moodledown   → Stops containers                    				\___________/					|
 |                                                                                					|
 | ➤ Start backup:                                       	DJS Moodle Docker Install Script  		|
@@ -153,5 +161,6 @@ cat <<'EOF' | tee -a "$LOG_FILE"
 |																									|
 | ➤ Log file: $LOG_FILE                                                          					|
 +---------------------------------------------------------------------------------------------------+
+
 EOF
 
