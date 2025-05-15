@@ -25,7 +25,7 @@ print_cmsg() {
 
 # Display title
 clear
-cat <<'EOF'
+cat <<'EOF' | tee -a "$LOG_FILE"
 
 ----------------------------------------------------------------------------------------------------------
   ___  ___    _   __  __              _ _       ___          _             _         _        _ _         
@@ -53,7 +53,7 @@ update_choice=${update_choice:-Y}
 # Perform system update if chosen
 if [[ "$update_choice" =~ ^[Yy]$ ]]; then
     print_cmsg "Performing system update..." | tee -a "$LOG_FILE"
-    sudo apt-get update && sudo apt-get upgrade -y
+    sudo apt update && sudo apt upgrade -y
     print_cmsg "System update completed." | tee -a "$LOG_FILE"
 else
     print_cmsg "Skipping system update." | tee -a "$LOG_FILE"
@@ -132,7 +132,7 @@ else
 fi
 
 # Note on activation
-echo "➡️  Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
+print_cmsg "Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
 
 # Final message and Docker Compose instructions
 cat <<EOF | tee -a "$LOG_FILE"
