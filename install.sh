@@ -88,7 +88,7 @@ sudo systemctl reload apache2
 
 # moodle migration
 # Mysql Dump
-mysqldump -u $MYSQL_ROOT_PASSWORD - -p$MYSQL_DATABASE > /opt/moodle-docker/moodle_backup.sql
+mysqldump -u root -p$MYSQL_ROOT_PASSWORD > /opt/moodle-docker/moodle_backup.sql
 # copy moodledata
 cp -r /var/www/moodledata /opt/moodle-docker
 
