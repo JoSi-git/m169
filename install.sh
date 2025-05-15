@@ -10,6 +10,8 @@ INSTALL_DIR="/opt/moodle-docker"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 SCRIPT_DIR="$(pwd)"
 ENV_FILE="$SCRIPT_DIR/Docker/.env"
+SHELL_RC="$HOME/.bashrc"
+Version="V1.0"
 
 # Display title
 clear
@@ -92,28 +94,49 @@ mysqldump -u root -p$MYSQL_ROOT_PASSWORD > /opt/moodle-docker/moodle_backup.sql
 # copy moodledata
 cp -r /var/www/moodledata /opt/moodle-docker
 
-# Final message and Docker Compose instructions (English)
-END_MSG="
-\033[1m+-----------------------------------------+
-|     Installation Complete               |
-|-----------------------------------------|
-| Moodle Docker setup complete!           |
-|                                         |
-| 1. Go to directory:                     |
-|    cd /opt/moodle-docker                |
-| 2. Start containers:                    |
-|    docker-compose up -d                 |
-| 3. Check status:                        |
-|    docker-compose ps                    |
-| 4. Access Moodle:                       |
-|    http://localhost:80                  |
-| 5. Stop containers:                     |
-|    docker-compose down                  |
-|                                         |
-| Note: Old infrastructure remains        |
-| accessible under http://localhost:8080  |
-| Installation log at '$LOG_FILE'.        |
-+-----------------------------------------+\033[0m"
 
-# Output the message to the console and append to the log file
-echo -e "$END_MSG" | tee -a "$LOG_FILE"
+# Add aliases to ~/.bashrc (if not already present)
+if ! grep -q "alias moodleup=" "$SHELL_RC"; then
+    {
+        echo ""
+        echo "# Moodle Docker aliases"
+        echo "alias moodleup='cd /opt/moodle-docker && docker-compose up -d && docker-compose ps && xdg-open http://localhost'"
+        echo "alias moodledown='cd /opt/moodle-docker && docker-compose down'"
+        echo "alias moodlebackup='echo \"[WIP] moodlebackup: This function is still under development. For details, see: https://github.com/JoSi-git/m169\"'"
+    } >> "$SHELL_RC"
+    echo "Aliases 'moodleup', 'moodledown', and 'moodlebackup' added to $SHELL_RC" | tee -a "$LOG_FILE"
+else
+    echo "Aliases already exist in $SHELL_RC – skipping addition." | tee -a "$LOG_FILE"
+fi
+
+# Note for activation
+echo "Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
+
+# Final message and Docker Compose instructions
+cat <<'EOF'
++---------------------------------------------------------------------------------------------------+
+|                             			Installation Complete!                     					|
+|---------------------------------------------------------------------------------------------------|
+| Moodle Docker setup complete!                                                  					|
+|                                                                                					|
+| ➤ Start Moodle:                                                               					|
+|   cd /opt/moodle-docker && docker-compose up -d                                					|
+|   → Status: docker-compose ps                                                  					|
+|   → Access: http://localhost:80                           			■■     		.               |
+|                                                                 ■■ ■■ ■■       	 ==        		|
+| ➤ Stop:                                    	   			   ■■ ■■ ■■ ■■ ■■ 	     ===      		|
+|   docker-compose down                                   	/"""""""""""""""""""\____/ ===          |
+|                                                 	~~~ ~~ {                          /~ === ~~ ~~~ |
+| ➤ You can also use aliases for convenience:         		\						 /		-     	|
+|   moodleup     → Starts & opens Moodle              		 \_______ O           __/				|
+|   moodledown   → Stops containers                    				\___________/					|
+|                                                                                					|
+| ➤ Start backup:                                       	DJS Moodle Docker Install Script  		|
+|   moodlebackup                                                      	$Version        			|
+|   Guide: https://github.com/JoSi-git/m169/readme.md                            					|
+|                                                                                					|
+| ➤ Legacy system: http://localhost:8080                                         					|
+|																									|
+| ➤ Log file: $LOG_FILE                                                          					
++---------------------------------------------------------------------------------------------------+"
+EOF | tee -a "$LOG_FILE"
