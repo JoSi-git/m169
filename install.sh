@@ -45,24 +45,24 @@ update_choice=${update_choice:-Y}
 
 # Perform system update if chosen
 if [[ "$update_choice" =~ ^[Yy]$ ]]; then
-    print_cmsg -e "Performing system update..." | tee -a "$LOG_FILE"
+    print_cmsg "Performing system update..." | tee -a "$LOG_FILE"
     sudo apt-get update && sudo apt-get upgrade -y
-    print_cmsg -e "System update completed." | tee -a "$LOG_FILE"
+    print_cmsg "System update completed." | tee -a "$LOG_FILE"
 else
-    print_cmsg -e "Skipping system update." | tee -a "$LOG_FILE"
+    print_cmsg "Skipping system update." | tee -a "$LOG_FILE"
 fi
 
 # Load environment variables from .env file
 if [[ -f "$ENV_FILE" ]]; then
     source "$ENV_FILE"
-    print_cmsg -e ".env file found and loaded." | tee -a "$LOG_FILE"
+    print_cmsg ".env file found and loaded." | tee -a "$LOG_FILE"
 else
-    print_cmsg -e ".env file found in $SCRIPT_DIR/Docker. Exiting." | tee -a "$LOG_FILE"
+    print_cmsg ".env file found in $SCRIPT_DIR/Docker. Exiting." | tee -a "$LOG_FILE"
     exit 1
 fi
 
 # Creating required directories in $INSTALL_DIR
-print_cmsg -e "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
+print_cmsg "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
 sudo mkdir -p "$INSTALL_DIR/moodle"
 sudo mkdir -p "$INSTALL_DIR/moodledata"
 sudo mkdir -p "$INSTALL_DIR/db_data"
@@ -72,17 +72,17 @@ sudo mkdir -p "$INSTALL_DIR/logs/apache"
 sudo mkdir -p "$INSTALL_DIR/logs/mariadb"
 
 # Copy Docker files
-print_cmsg -e "mCopying Docker files from $SCRIPT_DIR/Docker to $INSTALL_DIR..." | tee -a "$LOG_FILE"
+print_cmsg "Copying Docker files from $SCRIPT_DIR/Docker to $INSTALL_DIR..." | tee -a "$LOG_FILE"
 sudo cp "$SCRIPT_DIR/Docker/docker-compose.yml" "$INSTALL_DIR/"
 sudo cp "$SCRIPT_DIR/Docker/Dockerfile" "$INSTALL_DIR/"
 sudo cp "$SCRIPT_DIR/Docker/.env" "$INSTALL_DIR/"
 
 # Clone Moodle repository
-print_cmsg -e "Cloning Moodle repository..." | tee -a "$LOG_FILE"
+print_cmsg "Cloning Moodle repository..." | tee -a "$LOG_FILE"
 sudo git clone -b MOODLE_403_STABLE https://github.com/moodle/moodle.git "$INSTALL_DIR/moodle"
 
 # Changing port configuration
-print_cmsg -e "Adjusting Apache ports and Moodle config..." | tee -a "$LOG_FILE"
+print_cmsg "Adjusting Apache ports and Moodle config..." | tee -a "$LOG_FILE"
 sed -i 's/^\s*Listen\s\+80$/Listen 8080/' /etc/apache2/ports.conf
 
 site_conf="/etc/apache2/sites-available/000-default.conf"
@@ -127,7 +127,7 @@ fi
 print_cmsg "Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
 
 # Final message and Docker Compose instructions
-cat <<'EOF'
+cat <<'EOF' | tee -a "$LOG_FILE"
 +---------------------------------------------------------------------------------------------------+
 |                             			Installation Complete!                     					|
 |---------------------------------------------------------------------------------------------------|
@@ -151,6 +151,7 @@ cat <<'EOF'
 |                                                                                					|
 | ➤ Legacy system: http://localhost:8080                                         					|
 |																									|
-| ➤ Log file: $LOG_FILE                                                          					
-+---------------------------------------------------------------------------------------------------+"
-EOF | tee -a "$LOG_FILE"
+| ➤ Log file: $LOG_FILE                                                          					|
++---------------------------------------------------------------------------------------------------+
+EOF
+
