@@ -73,6 +73,7 @@ print_cmsg "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FIL
 sudo mkdir -p "$INSTALL_DIR/moodle"
 sudo mkdir -p "$INSTALL_DIR/moodledata"
 sudo mkdir -p "$INSTALL_DIR/db_data"
+sudo mkdir -p "$INSTALL_DIR/dumps"
 sudo mkdir -p "$INSTALL_DIR/logs"
 sudo mkdir -p "$INSTALL_DIR/logs/moodle"
 sudo mkdir -p "$INSTALL_DIR/logs/apache"
@@ -110,7 +111,7 @@ sudo systemctl reload apache2
 # Moodle migration
 
 # Mysql dump
-mysqldump -u root -p$MYSQL_ROOT_PASSWORD > /opt/moodle-docker/moodle_backup.sql
+mysqldump -u root -p$MYSQL_ROOT_PASSWORD > /opt/moodle-docker/dumps/moodle_backup.sql
 
 # Copy moodledata
 cp -r /var/www/moodledata /opt/moodle-docker
@@ -137,10 +138,10 @@ print_cmsg "Run 'source ~/.bashrc' or restart your terminal to activate the new 
 cat <<EOF | tee -a "$LOG_FILE"
 
 +---------------------------------------------------------------------------------------------------+
-|                             			Installation Complete!                     					|
+|                                     Installation Complete!                                        |
 |---------------------------------------------------------------------------------------------------|
-| Moodle Docker setup complete!                                                  					|
-|                                                                                					|
+| Moodle Docker setup complete!                                                                     |
+|                                                                                                   |
 | ➤ Start Moodle:                                                                                  |
 |   cd /opt/moodle-docker && docker-compose up -d                                                   |
 |   → Status: docker-compose ps                                                                     |
@@ -159,7 +160,7 @@ cat <<EOF | tee -a "$LOG_FILE"
 |                                                                                                   |
 | ➤ Legacy system: http://localhost:8080                                                           |
 |                                                                                                   |
-| ➤ Log file: $LOG_FILE                                                                            |
+| ➤ Log file: $LOG_FILE                                                                            
 +---------------------------------------------------------------------------------------------------+
 
 EOF
