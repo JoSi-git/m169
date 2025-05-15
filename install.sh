@@ -145,16 +145,16 @@ cat <<EOF | tee -a "$LOG_FILE"
 | => Start Moodle:                                                                                  |
 |   cd /opt/moodle-docker && docker-compose up -d                                                   |
 |   -> Status: docker-compose ps                                                                    |
-|   -> Access: http://localhost:80                                       ■■          .              |
+|   -> Access: http://localhost:80                                      ■■          .               |
 |                                                                 ■■ ■■ ■■           ==             |
 | => Stop:                                                     ■■ ■■ ■■ ■■ ■■         ===           |
 |   docker-compose down                                     /"""""""""""""""""""\____/ ===          |
-|                                                   ~~~ ~~ {                          /~ === ~~ ~~~ |
+|                                                 ~ ~~~ ~~ {                          /~ === ~~ ~~~ |
 | => You can also use aliases for convenience:              \                        /      -       |
-|   moodleup     -> Starts & opens Moodle                     \_______ O           __/				|
-|   moodledown   -> Stops containers                                  \___________/					|
+|   moodleup     -> Starts & opens Moodle                    \_______ O           __/               |
+|   moodledown   -> Stops containers                                 \___________/                  |
 |                                                                                                   |
-| => Start backup:                                       	DJS Moodle Docker Install Script        |
+| => Start backup:                                          DJS Moodle Docker Install Script        |
 |   moodlebackup                                                      	$Ver                        |
 |   Guide: https://github.com/JoSi-git/m169/readme.md                                               |
 |                                                                                                   |
