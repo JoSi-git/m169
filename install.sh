@@ -134,32 +134,32 @@ fi
 print_cmsg "Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
 
 # Final message and Docker Compose instructions
-cat <<'EOF' | tee -a "$LOG_FILE"
+cat <<EOF | tee -a "$LOG_FILE"
 
 +---------------------------------------------------------------------------------------------------+
 |                             			Installation Complete!                     					|
 |---------------------------------------------------------------------------------------------------|
 | Moodle Docker setup complete!                                                  					|
 |                                                                                					|
-| ➤ Start Moodle:                                                               					|
-|   cd /opt/moodle-docker && docker-compose up -d                                					|
-|   → Status: docker-compose ps                                                  					|
-|   → Access: http://localhost:80                                       ■■     		.               |
-|                                                                 ■■ ■■ ■■       	 ==        		|
-| ➤ Stop:                                                     ■■ ■■ ■■ ■■ ■■ 	     ===      		|
+| ➤ Start Moodle:                                                                                  |
+|   cd /opt/moodle-docker && docker-compose up -d                                                   |
+|   → Status: docker-compose ps                                                                     |
+|   → Access: http://localhost:80                                       ■■          .               |
+|                                                                 ■■ ■■ ■■           ==             |
+| ➤ Stop:                                                     ■■ ■■ ■■ ■■ ■■         ===           |
 |   docker-compose down                                     /"""""""""""""""""""\____/ ===          |
 |                                                   ~~~ ~~ {                          /~ === ~~ ~~~ |
-| ➤ You can also use aliases for convenience:              \                        /		-     	|
+| ➤ You can also use aliases for convenience:              \                        /      -       |
 |   moodleup     → Starts & opens Moodle                     \_______ O           __/				|
-|   moodledown   → Stops containers                    				\___________/					|
-|                                                                                					|
-| ➤ Start backup:                                       	DJS Moodle Docker Install Script  		|
-|   moodlebackup                                                      	$Version        			|
-|   Guide: https://github.com/JoSi-git/m169/readme.md                            					|
-|                                                                                					|
-| ➤ Legacy system: http://localhost:8080                                         					|
-|																									|
-| ➤ Log file: $LOG_FILE                                                          					|
+|   moodledown   → Stops containers                                  \___________/					|
+|                                                                                                   |
+| ➤ Start backup:                                       	DJS Moodle Docker Install Script       |
+|   moodlebackup                                                      	$Version                    |
+|   Guide: https://github.com/JoSi-git/m169/readme.md                                               |
+|                                                                                                   |
+| ➤ Legacy system: http://localhost:8080                                                           |
+|                                                                                                   |
+| ➤ Log file: $LOG_FILE                                                                            |
 +---------------------------------------------------------------------------------------------------+
 
 EOF
