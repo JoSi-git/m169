@@ -56,7 +56,7 @@ update_choice=${update_choice:-Y}
 # Perform system update if chosen
 if [[ "$update_choice" =~ ^[Yy]$ ]]; then
     print_cmsg "Performing system update..." | tee -a "$LOG_FILE"
-    sudo apt update && sudo apt upgrade -y
+    sudo apt update -y && sudo apt upgrade -y
     print_cmsg "System update completed." | tee -a "$LOG_FILE"
 else
     print_cmsg "Skipping system update." | tee -a "$LOG_FILE"
