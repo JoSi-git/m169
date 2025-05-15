@@ -86,6 +86,11 @@ awk '/{{> theme_boost\/navbar }}/ {print; print "<div style=\"background-color: 
 
 sudo systemctl reload apache2
 
+# moodle migration
+# Mysql Dump
+mysqldump -u MYSQL_ROOT_PASSWORD - -pMYSQL_DATABASE > /opt/moodle_backup.sql
+# copy moodledata
+cp -r /var/www/moodledata /opt/
 
 # Final message and Docker Compose instructions (English)
 END_MSG="
