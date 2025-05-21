@@ -11,9 +11,9 @@ LOG_FILE="$INSTALL_DIR/logs/install.log"
 SCRIPT_DIR="$(pwd)"
 ENV_FILE="$SCRIPT_DIR/Docker/.env"
 SHELL_RC="/home/$SUDO_USER/.bashrc"
-TIMESTAMP=$(date "+%Y.%m.%d - %H.%M")
+TIMESTAMP=$(date "+%Y.%m.%d-%H.%M")
 MOODLE_VERSION=$(sed -n "s/.*\$release *= *'\([0-9.]*\).*/\1/p" /var/www/html/version.php)
-BACKUP_DIR="${INSTALL_DIR}/backups/${MOODLE_VERSION} - ${TIMESTAMP}"
+BACKUP_DIR="${INSTALL_DIR}/dumps/${MOODLE_VERSION}-${TIMESTAMP}"
 VER="V1.0"
 
 # Function: Prints the given text in bold on the console
