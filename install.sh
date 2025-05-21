@@ -127,20 +127,21 @@ mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" > "${BACKUP_DIR}/moodle_dump.sql"
 # Copy the moodledata directory to the backup location
 cp -r /var/www/moodledata "${INSTALL_DIR}/moodledata"
 
-
 # Add aliases to ~/.bashrc (if not already present)
-if ! grep -qE "^alias moodleup=" "$SHELL_RC"; then
+if ! grep -qE "^alias moodle-up=" "$SHELL_RC"; then
     {
         echo ""
         echo "# Moodle Docker aliases"
-        echo "alias moodleup='(cd /opt/moodle-docker && docker compose up -d && docker compose ps && xdg-open http://localhost)'"
-        echo "alias moodledown='(cd /opt/moodle-docker && docker compose down)'"
-        echo "alias moodlebackup='echo \"[WIP] moodlebackup: This function is still under development. For details, see: https://github.com/JoSi-git/m169\"'"
+        echo "alias moodle-up='(cd \"$INSTALL_DIR\" && docker compose up -d && docker compose ps && xdg-open http://localhost)'"
+        echo "alias moodle-down='(cd \"$INSTALL_DIR\" && docker compose down)'"
+        echo "alias moodle-backup='(\"$INSTALL_DIR\"/tools/moodle-backup/moodle-backup.sh)'"
+        echo "alias moodle-restore='(\"$INSTALL_DIR\"/tools/moodle-backup/moodle-restore.sh)'"
     } >> "$SHELL_RC"
-    echo "Aliases 'moodleup', 'moodledown', and 'moodlebackup' added to $SHELL_RC" | tee -a "$LOG_FILE"
+     print_cmsg "Aliases 'moodle-up', 'moodle-down', 'moodle-backup', and 'moodle-restore added to $SHELL_RC" | tee -a "$LOG_FILE"
 else
     print_cmsg "Aliases already exist in $SHELL_RC - skipping addition." | tee -a "$LOG_FILE"
 fi
+
 
 # Note on activation
 print_cmsg "Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
