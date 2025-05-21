@@ -1,56 +1,69 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ---- Default-Konfiguration ----
-BASE_DIR="/opt/moodle-docker"
-DUMPS_DIR="$BASE_DIR/dumps"
+# → Basis-Pfad (anpassbar mit -p)
+INSTALL_DIR="/opt/moodle-docker"
+COMPOSE_DIR="$INSTALL_DIR/docker"
+ENV_FILE="$COMPOSE_DIR/.env"
+DUMPS_DIR="$INSTALL_DIR/dumps"
 
-# ---- Optionen parsen ----
-usage() {
-  echo "Usage: $(basename "$0") [-p base_path] <backup_dir>"
-  echo "  -p base_path   Pfad zur Moodle-Docker-Umgebung (default: $BASE_DIR)"
-  echo "  <backup_dir>   Verzeichnis des Backups (voller Pfad oder relativ zu $DUMPS_DIR)"
+# → Docker-Compose prüfen
+if command -v docker &>/dev/null && docker compose version &>/dev/null; then
+  DCMD="docker compose"
+elif command -v docker-compose &>/dev/null; then
+  DCMD="docker-compose"
+else
+  echo "Error: Weder 'docker compose' noch 'docker-compose' gefunden." >&2
   exit 1
-}
+fi
 
-while getopts ":p:" opt; do
+# → Optionen
+usage(){
+  echo "Usage: $(basename "$0") [-p install_dir] <backup_dir>"; exit 1
+}
+while getopts "p:" opt; do
   case $opt in
-    p) BASE_DIR="$OPTARG"; DUMPS_DIR="$BASE_DIR/dumps" ;;
+    p) INSTALL_DIR="$OPTARG"; COMPOSE_DIR="$INSTALL_DIR/docker"; DUMPS_DIR="$INSTALL_DIR/dumps" ;;
     *) usage ;;
   esac
 done
 shift $((OPTIND-1))
-if [[ $# -ne 1 ]]; then
-  usage
-fi
+[[ $# -eq 1 ]] || usage
 
-# ---- Backup-Verzeichnis ermitteln ----
+# → Backup-Pfad ermitteln
 INPUT="$1"
-if [[ ! -d "$INPUT" ]]; then
-  INPUT="$DUMPS_DIR/$INPUT"
-fi
-if [[ ! -d "$INPUT" ]]; then
-  echo "Backup-Verzeichnis nicht gefunden: $INPUT" >&2
+[[ -d "$INPUT" ]] || INPUT="$DUMPS_DIR/$INPUT"
+[[ -d "$INPUT" ]] || { echo "Backup nicht gefunden: $1"; exit 1; }
+
+# → .env laden
+if [[ -f "$ENV_FILE" ]]; then
+  source "$ENV_FILE"
+else
+  echo ".env nicht gefunden unter $ENV_FILE" >&2
   exit 1
 fi
 
-# ---- Container runterfahren ----
-echo "Stopping all Moodle containers…"
-cd "$BASE_DIR"
-docker compose down
+# → Container runterfahren
+echo "Stopping containers…"
+pushd "$COMPOSE_DIR" >/dev/null
+$DCMD down
+popd >/dev/null
 
-# ---- Daten zurückspielen ----
+# → DB-Restore
 echo "Restoring DB…"
 docker exec -i moodle-db \
   mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" \
   < "$INPUT/moodle_db.sql"
 
+# → moodledata zurückkopieren
 echo "Restoring moodledata…"
-rm -rf "$BASE_DIR/moodledata"
-rsync -ah "$INPUT/moodledata/" "$BASE_DIR/moodledata/"
+rm -rf "$INSTALL_DIR/moodledata"
+rsync -a "$INPUT/moodledata/" "$INSTALL_DIR/moodledata/"
 
-# ---- Container wieder hochfahren ----
-echo "Starting Moodle containers…"
-docker compose up -d
+# → Container wieder hochfahren
+echo "Starting containers…"
+pushd "$COMPOSE_DIR" >/dev/null
+$DCMD up -d
+popd >/dev/null
 
-echo "Restore completed from: $INPUT"
+echo "Restore abgeschlossen von: $INPUT"
