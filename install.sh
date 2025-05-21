@@ -2,7 +2,7 @@
 
 # DJS Moodle Docker Install Script
 # Author: JoSi
-# Last Update: 2025-05-14
+# Last Update: 2025-05-21
 # Description: Sets up the Moodle Docker environment under /opt/moodle-docker.
 
 # Variables
@@ -31,17 +31,17 @@ mkdir -p "$INSTALL_DIR/logs"
 
 # Display title
 clear
-cat <<'EOF' | tee -a "$LOG_FILE"
 
-----------------------------------------------------------------------------------------------------------
-  ___  ___    _   __  __              _ _       ___          _             _         _        _ _         
- |   \/ __|_ | | |  \/  |___  ___  __| | |___  |   \ ___  __| |_____ _ _  (_)_ _  __| |_ __ _| | |___ _ _ 
- | |) \__ \ || | | |\/| / _ \/ _ \/ _` | / -_) | |) / _ \/ _| / / -_) '_| | | ' \(_-<  _/ _` | | / -_) '_|
+cat <<EOF | tee -a "$LOG_FILE"
+$(printf '\033[38;5;33m')----------------------------------------------------------------------------------------------------------
+  ___  ___    _   __  __              _ _       ___          _             _         _        _ _
+ |   \/ __|_ | | |  \/  |___  ___  __| | |___  |   \ ___  __| |_____ _ _  (_)_ _  __| |_ __ _| | |___ _ _
+ | |) \__ \ || | | |\/| / _ \/ _ \/ _\` | / -_) | |) / _ \/ _| / / -_) '_| | | ' \(_-<  _/ _\` | | / -_) '_|
  |___/|___/\__/  |_|  |_\___/\___/\__,_|_\___| |___/\___/\__|_\_\___|_|   |_|_||_/__/\__\__,_|_|_\___|_|
-
 ----------------------------------------------------------------------------------------------------------
-
+$(printf '\033[0m')
 EOF
+
 
 # Check if the script is running as root
 if [[ "$EUID" -ne 0 ]]; then
@@ -64,6 +64,12 @@ if [[ "$update_choice" =~ ^[Yy]$ ]]; then
 else
     print_cmsg "Skipping system update." | tee -a "$LOG_FILE"
 fi
+
+# Installing gum
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
+sudo apt update && sudo apt install gum
 
 # Load environment variables from .env file
 if [[ -f "$ENV_FILE" ]]; then
@@ -147,34 +153,30 @@ fi
 print_cmsg "Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"
 
 # Final message and Docker Compose instructions
-cat <<EOF | tee -a "$LOG_FILE"
+gum style --border normal --margin "1" --padding "1 2" --border-foreground 33 << EOF | tee -a "$LOG_FILE"
+═════════════════════════════════════════════════════════════════════════════════════════════════
+                                Moodle Docker setup complete!
+═════════════════════════════════════════════════════════════════════════════════════════════════
 
-+---------------------------------------------------------------------------------------------------+
-|                                     Installation Complete!                                        |
-|---------------------------------------------------------------------------------------------------|
-| Moodle Docker setup complete!                                                                     |
-|                                                                                                   |
-| => Start Moodle:                                                                                  |
-|   cd /opt/moodle-docker && docker compose up -d                                                   |
-|   -> Status: docker compose ps                                                                    |
-|   -> Access: http://localhost:80                                      ■■          .               |
-|                                                                 ■■ ■■ ■■           ==             |
-| => Stop:                                                     ■■ ■■ ■■ ■■ ■■         ===           |
-|   docker compose down                                     /"""""""""""""""""""\____/ ===          |
-|                                                 ~ ~~~ ~~ {                          /~ === ~~ ~~~ |
-| => You can also use aliases for convenience:              \                        /      -       |
-|   moodleup     -> Starts & opens Moodle                    \_______ O           __/               |
-|   moodledown   -> Stops containers                                 \___________/                  |
-|                                                                                                   |
-| => Start backup:                                          DJS Moodle Docker Install Script        |
-|   moodlebackup                                                      	$VER                        |
-|   Guide: https://github.com/JoSi-git/m169/readme.md                                               |
-|                                                                                                   |
-| => Legacy system: http://localhost:8080                                                           |
-|                                                                                                   |
-| => Log file: $LOG_FILE                                                                            
-+---------------------------------------------------------------------------------------------------+
+ => Start Moodle:
+   cd /opt/moodle-docker && docker compose up -d
+   -> Status: docker compose ps
+   -> Access: http://localhost:80                                      ■■          .
+                                                                 ■■ ■■ ■■           ==
+ => Stop:                                                     ■■ ■■ ■■ ■■ ■■         ===
+   docker compose down                                     /"""""""""""""""""""\____/ ===
+                                                 ~ ~~~ ~~ {                          /~ === ~~ ~~~
+ => You can also use aliases for convenience:              \                        /      -
+   moodleup     -> Starts & opens Moodle                    \_______ O           __/
+   moodledown   -> Stops containers                                 \___________/
 
+ => Start backup:                                          DJS Moodle Docker Install Script
+   moodlebackup                                                      	$VER
+   Guide: https://github.com/JoSi-git/m169/readme.md
+
+ => Legacy system: http://localhost:8080
+
+ => Log file: $LOG_FILE
 EOF
 
 exit
