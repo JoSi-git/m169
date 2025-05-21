@@ -11,7 +11,10 @@ LOG_FILE="$INSTALL_DIR/logs/install.log"
 SCRIPT_DIR="$(pwd)"
 ENV_FILE="$SCRIPT_DIR/Docker/.env"
 SHELL_RC="/home/$SUDO_USER/.bashrc"
-Ver="V1.0"
+TIMESTAMP=$(date "+%Y.%m.%d - %H.%M")
+MOODLE_VERSION=$(sed -n "s/.*\$release *= *'\([0-9.]*\).*/\1/p" /var/www/html/version.php)
+BACKUP_DIR="${INSTALL_DIR}/backups/${MOODLE_VERSION} - ${TIMESTAMP}"
+VER="V1.0"
 
 # Function: Prints the given text in bold on the console
 print_cmsg() {
@@ -76,16 +79,19 @@ print_cmsg "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FIL
 mkdir -p "$INSTALL_DIR/moodle"
 mkdir -p "$INSTALL_DIR/moodledata"
 mkdir -p "$INSTALL_DIR/db_data"
+mkdir -p "$INSTALL_DIR/tools"
+mkdir -p "$INSTALL_DIR/tools/moodle-backup"
+mkdir -p "$INSTALL_DIR/tools/moodle-migration"
 mkdir -p "$INSTALL_DIR/dumps"
 mkdir -p "$INSTALL_DIR/logs/moodle"
 mkdir -p "$INSTALL_DIR/logs/apache"
 mkdir -p "$INSTALL_DIR/logs/mariadb"
 
 # Copy Docker files
-print_cmsg "Copying Docker files from $SCRIPT_DIR/Docker to $INSTALL_DIR..." | tee -a "$LOG_FILE"
-cp "$SCRIPT_DIR/Docker/docker-compose.yml" "$INSTALL_DIR/"
-cp "$SCRIPT_DIR/Docker/Dockerfile" "$INSTALL_DIR/"
-cp "$SCRIPT_DIR/Docker/.env" "$INSTALL_DIR/"
+print_cmsg "Copying files from $SCRIPT_DIR/Docker to $INSTALL_DIR..." | tee -a "$LOG_FILE"
+cp -r "$SCRIPT_DIR/docker" "$INSTALL_DIR/"
+cp -r "$SCRIPT_DIR/moodle-backup" "$INSTALL_DIR/tools"
+cp -r "$SCRIPT_DIR/moodle-migration" "$INSTALL_DIR/tools"
 
 # Clone Moodle repository
 print_cmsg "Cloning Moodle repository..." | tee -a "$LOG_FILE"
@@ -112,11 +118,14 @@ systemctl reload apache2
 
 # Moodle migration
 
-# Mysql dump
-mysqldump -u root -p$MYSQL_ROOT_PASSWORD > /opt/moodle-docker/dumps/moodle_backup.sql
+# Create the backup directory
+mkdir -p "$BACKUP_DIR"
 
-# Copy moodledata
-cp -r /var/www/moodledata /opt/moodle-docker
+# Perform a MySQL dump of the Moodle database
+mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" > "${BACKUP_DIR}/moodle_dump.sql"
+
+# Copy the moodledata directory to the backup location
+cp -r /var/www/moodledata "${INSTALL_DIR}/moodledata"
 
 
 # Add aliases to ~/.bashrc (if not already present)
@@ -157,7 +166,7 @@ cat <<EOF | tee -a "$LOG_FILE"
 |   moodledown   -> Stops containers                                 \___________/                  |
 |                                                                                                   |
 | => Start backup:                                          DJS Moodle Docker Install Script        |
-|   moodlebackup                                                      	$Ver                        |
+|   moodlebackup                                                      	$VER                        |
 |   Guide: https://github.com/JoSi-git/m169/readme.md                                               |
 |                                                                                                   |
 | => Legacy system: http://localhost:8080                                                           |
