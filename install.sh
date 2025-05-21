@@ -95,7 +95,7 @@ mkdir -p "$INSTALL_DIR/logs/mariadb"
 
 # Copy Docker files
 print_cmsg "Copying files from $SCRIPT_DIR/Docker to $INSTALL_DIR..." | tee -a "$LOG_FILE"
-cp -r "$SCRIPT_DIR/docker" "$INSTALL_DIR/"
+cp -r "$SCRIPT_DIR/docker/"* "$INSTALL_DIR/"
 cp -r "$SCRIPT_DIR/moodle-backup" "$INSTALL_DIR/tools"
 cp -r "$SCRIPT_DIR/moodle-migration" "$INSTALL_DIR/tools"
 
