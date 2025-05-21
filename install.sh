@@ -9,7 +9,7 @@
 INSTALL_DIR="/opt/moodle-docker"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 SCRIPT_DIR="$(pwd)"
-ENV_FILE="$SCRIPT_DIR/Docker/.env"
+ENV_FILE="$SCRIPT_DIR/docker/.env"
 SHELL_RC="/home/$SUDO_USER/.bashrc"
 TIMESTAMP=$(date "+%Y.%m.%d-%H.%M")
 MOODLE_VERSION=$(sed -n "s/.*\$release *= *'\([0-9.]*\).*/\1/p" /var/www/html/version.php)
