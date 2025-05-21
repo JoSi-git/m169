@@ -1,69 +1,81 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# → Basis-Pfad (anpassbar mit -p)
-INSTALL_DIR="/opt/moodle-docker"
-COMPOSE_DIR="$INSTALL_DIR/docker"
-ENV_FILE="$COMPOSE_DIR/.env"
-DUMPS_DIR="$INSTALL_DIR/dumps"
+# Moodle Docker Restore Script
+# Usage: moodle-restore.sh -f <full_name> | -i <incremental_name>
+#   -f <name>: full-backup directory (e.g. 4.2.1-20250520-140000-full)
+#   -i <name>: incremental-backup directory (e.g. 4.2.1-20250520-140000-incremental)
 
-# → Docker-Compose prüfen
-if command -v docker &>/dev/null && docker compose version &>/dev/null; then
-  DCMD="docker compose"
-elif command -v docker-compose &>/dev/null; then
-  DCMD="docker-compose"
-else
-  echo "Error: Weder 'docker compose' noch 'docker-compose' gefunden." >&2
-  exit 1
-fi
+# Variables
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INSTALL_DIR="$(cd "$SCRIPT_DIR/../../" && pwd)"
+BACKUP_BASE="$INSTALL_DIR/dumps"
 
-# → Optionen
-usage(){
-  echo "Usage: $(basename "$0") [-p install_dir] <backup_dir>"; exit 1
-}
-while getopts "p:" opt; do
+# Parse options
+MODE=""
+BACKUP_NAME=""
+while getopts "f:i:" opt; do
   case $opt in
-    p) INSTALL_DIR="$OPTARG"; COMPOSE_DIR="$INSTALL_DIR/docker"; DUMPS_DIR="$INSTALL_DIR/dumps" ;;
-    *) usage ;;
+    f) MODE="full"; BACKUP_NAME="$OPTARG" ;;
+    i) MODE="incremental"; BACKUP_NAME="$OPTARG" ;;
+    *) echo "Usage: $0 -f <full_name> | -i <incremental_name>"; exit 1 ;;
   esac
 done
-shift $((OPTIND-1))
-[[ $# -eq 1 ]] || usage
 
-# → Backup-Pfad ermitteln
-INPUT="$1"
-[[ -d "$INPUT" ]] || INPUT="$DUMPS_DIR/$INPUT"
-[[ -d "$INPUT" ]] || { echo "Backup nicht gefunden: $1"; exit 1; }
-
-# → .env laden
-if [[ -f "$ENV_FILE" ]]; then
-  source "$ENV_FILE"
-else
-  echo ".env nicht gefunden unter $ENV_FILE" >&2
+if [[ -z "$MODE" || -z "$BACKUP_NAME" ]]; then
+  echo "Error: specify -f <full_name> or -i <incremental_name>"
   exit 1
 fi
 
-# → Container runterfahren
-echo "Stopping containers…"
-pushd "$COMPOSE_DIR" >/dev/null
-$DCMD down
-popd >/dev/null
+BACKUP_DIR="$BACKUP_BASE/$BACKUP_NAME"
+if [[ ! -d "$BACKUP_DIR" ]]; then
+  echo "Error: backup directory not found: $BACKUP_DIR"
+  exit 1
+fi
 
-# → DB-Restore
-echo "Restoring DB…"
-docker exec -i moodle-db \
+# If incremental, find the matching full backup
+if [[ "$MODE" == "incremental" ]]; then
+  VERSION="${BACKUP_NAME%%-*}"
+  mapfile -t fulls < <(ls -1d "$BACKUP_BASE/${VERSION}-"*"-full" 2>/dev/null | sort)
+  if [[ ${#fulls[@]} -eq 0 ]]; then
+    echo "Error: kein Full-Backup für Version $VERSION gefunden"
+    exit 1
+  fi
+  FULL_DIR="${fulls[-1]}"
+else
+  FULL_DIR="$BACKUP_DIR"
+fi
+
+# Stop containers
+echo "Stopping Moodle containers..."
+cd "$INSTALL_DIR"
+docker compose down
+
+# Restore database
+echo "Restoring database..."
+DB_CONTAINER=$(docker compose ps -q db)
+docker exec -i "$DB_CONTAINER" \
   mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" \
-  < "$INPUT/moodle_db.sql"
+  < "$BACKUP_DIR/moodle_db.sql"
 
-# → moodledata zurückkopieren
-echo "Restoring moodledata…"
+# Restore moodledata from full
+echo "Restoring moodledata from full backup..."
 rm -rf "$INSTALL_DIR/moodledata"
-rsync -a "$INPUT/moodledata/" "$INSTALL_DIR/moodledata/"
+mkdir -p "$INSTALL_DIR/moodledata"
+tar -xzf "$FULL_DIR/moodledata-full.tar.gz" -C "$INSTALL_DIR"
 
-# → Container wieder hochfahren
-echo "Starting containers…"
-pushd "$COMPOSE_DIR" >/dev/null
-$DCMD up -d
-popd >/dev/null
+# Apply incremental if requested
+if [[ "$MODE" == "incremental" ]]; then
+  echo "Applying incremental backup..."
+  tar -xzf "$BACKUP_DIR/moodledata-incremental.tar.gz" -C "$INSTALL_DIR"
+fi
 
-echo "Restore abgeschlossen von: $INPUT"
+# Fix permissions
+echo "Fixing permissions..."
+chown -R 33:33 "$INSTALL_DIR/moodledata"
+
+# Start containers
+echo "Starting Moodle containers..."
+docker compose up -d
+
+echo "Restore ($MODE) completed from: $BACKUP_NAME"
