@@ -136,7 +136,7 @@ cd $INSTALL_DIR/tools/moodle-migration
 ###########################
 
 # build image
-docker build -t migration-moodle:latest --no-cache -f Dockerfile .
+docker build -t moodle-custom:401 --no-cache -f Dockerfile .
 # start container
 docker compose up -d
 # upgrade database
@@ -155,7 +155,7 @@ sed -i 's/--branch MOODLE_401_STABLE/--branch MOODLE_402_STABLE/' Dockerfile
 # replace apache version
 sed -i 's|^FROM moodlehq/moodle-php-apache:7\.4|FROM moodlehq/moodle-php-apache:8.2|' Dockerfile
 # rebuild docker image
-docker build -t migration-moodle:latest --no-cache -f Dockerfile .
+docker build -t moodle-custom:402 --no-cache -f Dockerfile .
 # restart container
 docker compose up -d
 # upgrade database
@@ -175,7 +175,7 @@ sed -i 's/--branch MOODLE_402_STABLE/--branch MOODLE_500_STABLE/' Dockerfile
 # replace mariadb version
 sed -i 's|image: mariadb:10\.6|image: mariadb:10.11|' docker-compose.yml
 # rebuild docker image
-docker build -t migration-moodle:latest --no-cache -f Dockerfile .
+docker build -t moodle-custom:latest -t moodle-custom:500 --no-cache  -f Dockerfile .
 # restart container
 docker compose up -d
 # upgrade database

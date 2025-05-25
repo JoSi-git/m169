@@ -14,7 +14,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Clone Moodle (adjust branch as needed)
-RUN git clone --branch MOODLE_500_STABLE https://github.com/moodle/moodle.git /var/www/html
+RUN git clone --branch MOODLE_401_STABLE https://github.com/moodle/moodle.git /var/www/html
 
 # Copy preconfigured config.php (contains DB and Moodle settings)
 COPY config.php /var/www/html/config.php
