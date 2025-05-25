@@ -2,8 +2,8 @@ version: '3.8'
 
 services:
   db:
-    image: mariadb:10.11
-    container_name: moodle-db
+    image: mariadb:10.6
+    container_name: moodle-db-migration
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -12,27 +12,28 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
-      - ./logs/mariadb:/var/log/mysql
+    networks:
+      - moodle-net
 
   moodle:
-    build: .
-    container_name: moodle-web
+    image: migration-moodle:latest
+    container_name: moodle-migration
     restart: always
     ports:
       - "80:80"
     environment:
       PHP_INI-upload_max_filesize: ${PHP_INI_upload_max_filesize}
       PHP_INI-post_max_size: ${PHP_INI_post_max_size}
-    volumes:
-      - ./moodle:/var/www/html
-      - ./moodledata:/var/www/moodledata
-      - ./logs/apache:/var/log/apache2    # Apache-Access+Error-Logs
-      - ./logs/moodle:/var/moodledata/logs  # Moodle-App-Logs (wenn du file-based Logging nutzt)
-
     depends_on:
       - db
+    networks:
+      - moodle-net
+
+networks:
+  moodle-net:
+    driver: bridge
 
 volumes:
   db_data:
     external: true   
-    name: moodle-docker_db_data
+    name: moodle-migration_db_data
