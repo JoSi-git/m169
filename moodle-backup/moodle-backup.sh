@@ -15,6 +15,13 @@ DB_NAME="$MYSQL_DATABASE"
 MOODLE_CONTAINER="$CONTAINER_MOODLE"
 DB_CONTAINER="$CONTAINER_DB"
 
+# Check if the script is running as root
+if [[ "$EUID" -ne 0 ]]; then
+  print_cmsg "This script must be run with sudo or as root." >&2
+  exec sudo "$0" "$@"
+  exit 1
+fi
+
 # Stop web service
 echo "Stopping web server in container '$MOODLE_CONTAINER'..."
 docker exec "$MOODLE_CONTAINER" service apache2 stop

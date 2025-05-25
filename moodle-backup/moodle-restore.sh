@@ -10,6 +10,13 @@ DB_NAME="$MYSQL_DATABASE"
 MOODLE_CONTAINER="$CONTAINER_MOODLE"
 DB_CONTAINER="$CONTAINER_DB"
 
+# Check if the script is running as root
+if [[ "$EUID" -ne 0 ]]; then
+  print_cmsg "This script must be run with sudo or as root." >&2
+  exec sudo "$0" "$@"
+  exit 1
+fi
+
 # List available backups (most recent first)
 echo "Available backups:"
 ls -1t "$BACKUP_DIR"/*.tar.gz | head -n 20 | nl
