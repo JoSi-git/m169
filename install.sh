@@ -122,7 +122,7 @@ systemctl reload apache2
 mkdir -p "$BACKUP_DIR"
 
 # Perform a MySQL dump of the Moodle database
-mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" "moodle" > "${BACKUP_DIR}/${MOODLE_VERSION}-${TIMESTAMP}.sql
+mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" "moodle" > "${BACKUP_DIR}/migration/${MOODLE_VERSION}-${TIMESTAMP}.sql"
 
 
 # Moodle migration
