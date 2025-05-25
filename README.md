@@ -8,7 +8,7 @@
 
 Eine ältere Moodle-Instanz muss auf die aktuelle Version als Docker-Container migriert werden, inklusive aller Daten. Dies erfolgt im Rahmen des Modulprojekts und wird in mehreren Schritten durchgeführt.
 
-## 2 Anforderungen (Requirements)
+## 📦 2 Anforderungen (Requirements)
 
 ### Git installieren  
 Sicherstellen, dass Git auf dem System installiert ist:
@@ -18,9 +18,9 @@ sudo apt install git
 ```
 
 ### Git-Repository klonen 
-Klonen eines Repositories (beim ersten Mal):
+Klonen des Repositories:
 ```bash
-git clone <repository-url>
+git clone https://github.com/JoSi-git/m169
 ```
 
 ### Repository aktualisieren:
