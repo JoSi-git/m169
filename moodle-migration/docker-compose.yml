@@ -5,8 +5,6 @@ services:
     image: mariadb:10.6
     container_name: moodle-db-migration
     restart: always
-    env_file:
-      ../.env
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -22,8 +20,6 @@ services:
     build: .
     container_name: moodle-migration
     restart: always
-    env_file:
-      ../.env
     ports:
       - "80:80"
     environment:
@@ -38,8 +34,6 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     container_name: pma-migration
     restart: always
-    env_file:
-      ../.env
     ports:
       - "8081:80"                               # Du erreichst phpMyAdmin auf http://localhost:8081
     environment:
