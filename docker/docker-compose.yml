@@ -36,4 +36,4 @@ networks:
 volumes:
   db_data:
     external: true   
-    name: moodle-docker_db_data
+    name: moodle-migration_db_data
