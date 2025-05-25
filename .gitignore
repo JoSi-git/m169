@@ -1,7 +1,3 @@
 .obsidian/
 
 .env
-
-docker/moodle/*
-docker/moodledata/*
-docker/db_data/*
