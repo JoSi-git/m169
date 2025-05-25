@@ -164,6 +164,8 @@ sleep 5
 docker exec -u www-data moodle-migration php /var/www/html/admin/cli/upgrade.php --non-interactive
 # docker compose down
 docker compose down
+# prune all unused docker images
+docker image prune -a -f
 
 ##########################
 # upgrade to version 500 #
