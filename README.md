@@ -1,5 +1,6 @@
-![image](./img/m169-title.png)
-
+<div align="left">
+  <img src="https://github.com/JoSi-git/m169/blob/main/img/m169-title.png" />
+</div>
 
 [![Silas Gubler](https://img.shields.io/badge/Silas_Gubler-FF7F50?style=for-the-badge)](https://github.com/arkaizn)
 [![David Kästli](https://img.shields.io/badge/David_Kästli-00FA9A?style=for-the-badge)](https://github.com/dka-git)
