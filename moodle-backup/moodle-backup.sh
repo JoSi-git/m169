@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Moodle Docker backup script
-# Author: dka
+# Author: JoSi
 # Last Update: 2025-05-25
 # Description: Moodle backup tool
 

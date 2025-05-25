@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Moodle Docker restore script
-# Author: dka
+# Author: JoSi
 # Last Update: 2025-05-25
 # Description: Moodle restore tool
 
@@ -30,13 +30,6 @@ fi
 # Load environment variables
 source "./.env"
 
-# Container and database details
-DB_USER="$MYSQL_ROOT_USER"
-DB_PASS="$MYSQL_ROOT_PASSWORD"
-DB_NAME="$MYSQL_DATABASE"
-MOODLE_CONTAINER="$CONTAINER_MOODLE"
-DB_CONTAINER="$CONTAINER_DB"
-
 # List available backups (most recent first)
 gum style --border normal --padding "1 2" --border-foreground 33 <<EOF
 $(ls -1t "$BACKUP_DIR"/*.tar.gz | head -n 20 | nl)
@@ -59,8 +52,8 @@ fi
 print_cmsg "Restoring backup: $BACKUP_FILE"
 
 
-print_cmsg "Stopping web server in container '$MOODLE_CONTAINER'..."
-docker exec "$MOODLE_CONTAINER" service apache2 stop
+print_cmsg "Stopping web server in container '$CONTAINER_MOODLE'..."
+docker exec "$CONTAINER_MOODLE" service apache2 stop
 
 # Create temporary restore directory
 TMP_DIR=$(mktemp -d)
@@ -70,20 +63,20 @@ tar -xzf "$BACKUP_FILE" -C "$TMP_DIR"
 
 # Restore web files
 print_cmsg "Copying web files back into container..."
-docker cp "$TMP_DIR/moodle" "$MOODLE_CONTAINER":/var/www/html
+docker cp "$TMP_DIR/moodle" "$CONTAINER_MOODLE":/var/www/html
 
 # Set correct permissions
-docker exec "$MOODLE_CONTAINER" chown -R www-data:www-data /var/www/html
+docker exec "$CONTAINER_MOODLE" chown -R www-data:www-data /var/www/html
 
 # Restore database
 print_cmsg "Importing SQL dump into database..."
-cat "$TMP_DIR/db.sql" | docker exec -i "$DB_CONTAINER" \
-  bash -c "mysql -u$DB_USER -p$DB_PASS $DB_NAME"
+cat "$TMP_DIR/db.sql" | docker exec -i "$CONTAINER_DB" \
+  bash -c "mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE"
 
 # Cleanup
 rm -rf "$TMP_DIR"
 
-print_cmsg "Starting web server in container '$MOODLE_CONTAINER'..."
-docker exec "$MOODLE_CONTAINER" service apache2 start
+print_cmsg "Starting web server in container '$CONTAINER_MOODLE'..."
+docker exec "$CONTAINER_MOODLE" service apache2 start
 
 print_cmsg "Restore complete."
