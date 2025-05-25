@@ -126,7 +126,7 @@ mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" "moodle" > $INSTALL_DIR/dumps/moodle_
 
 
 # Moodle migration
-cd /opt/moodle-docker/migration
+cd $INSTALL_DIR/tools/moodle-migration
 ###########################
 # upgrade to versuion 401 #
 ###########################
