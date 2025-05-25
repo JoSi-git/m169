@@ -93,3 +93,4 @@ Typische Pfade:
 /opt/moodle-docker/moodledata/config.php (falls vorhanden)
 ```
 
+---
