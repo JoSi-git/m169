@@ -98,6 +98,9 @@ print_cmsg "Copying files from $SCRIPT_DIR/docker to $INSTALL_DIR..." | tee -a "
 cp -r "$SCRIPT_DIR/docker/"* "$INSTALL_DIR/"
 cp -r "$SCRIPT_DIR/moodle-backup" "$INSTALL_DIR/tools"
 cp -r "$SCRIPT_DIR/moodle-migration" "$INSTALL_DIR/tools"
+cp -r "$SCRIPT_DIR/.env" "$INSTALL_DIR"
+cp -r "$SCRIPT_DIR/.env" "$INSTALL_DIR/tools/moodle-migration"
+
 
 # Changing port configuration
 print_cmsg "Adjusting Apache ports and Moodle config..." | tee -a "$LOG_FILE"
