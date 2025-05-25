@@ -2,20 +2,10 @@
   <img src="https://github.com/JoSi-git/m169/blob/main/img/m169-title.png" />
 </div>
 
-<p align="center">
-  <a href="https://github.com/arkaizn">
-    <img src="https://img.shields.io/badge/Silas_Gubler-FF7F50?style=for-the-badge" alt="Silas Gubler"/>
-  </a>
-  <a href="https://github.com/dka-git">
-    <img src="https://img.shields.io/badge/David_Kästli-00FA9A?style=for-the-badge" alt="David Kästli"/>
-  </a>
-  <a href="https://github.com/josi-git">
-    <img src="https://img.shields.io/badge/Jonas_Sieber-4682B4?style=for-the-badge" alt="Jonas Sieber"/>
-  </a>
-  <a href="https://github.com/JoSi-git/m346/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/Lizenz-DAA520?style=for-the-badge" alt="Lizenz"/>
-  </a>
-</p>
+[![](https://img.shields.io/badge/Silas_Gubler-FF7F50?style=for-the-badge)](https://github.com/arkaizn)
+[![](https://img.shields.io/badge/David_Kästli-00FA9A?style=for-the-badge)](https://github.com/dka-git)
+[![](https://img.shields.io/badge/Jonas_Sieber-4682B4?style=for-the-badge)](https://github.com/josi-git)
+[![](https://img.shields.io/badge/Lizenz-DAA520?style=for-the-badge)](https://github.com/JoSi-git/m346/blob/main/LICENSE)
 
 
 ## 🔍 1 Ausgangslage
