@@ -180,6 +180,8 @@ docker compose up -d
 echo "upgrade moodle to 500, waiting..."
 sleep 5
 docker exec -u www-data moodle-migration php /var/www/html/admin/cli/upgrade.php --non-interactive
+# docker compose down
+docker compose down
 
 # Add aliases to ~/.bashrc (if not already present)
 if ! grep -qE "^alias moodle-up=" "$SHELL_RC"; then
