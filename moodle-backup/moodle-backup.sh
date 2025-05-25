@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Moodle Docker Backup Script
+# Author: dka
+# Last Update: 2025-05-21
+# Description: Creates a Full Backup of the Database.
+
 # Moodle Full Backup Script
 INSTALL_DIR="/opt/moodle-docker"
 BACKUP_DIR="$INSTALL_DIR/tools/moodle-backup"
