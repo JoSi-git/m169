@@ -1,4 +1,4 @@
-FROM moodlehq/moodle-php-apache:8.3
+FROM moodlehq/moodle-php-apache:8.2
 
 # System-Paketliste aktualisieren und nötige Tools installieren
 RUN apt-get update && \
