@@ -5,15 +5,6 @@
 # Last Update: 2025-05-21
 # Description: Sets up the Moodle Docker environment under /opt/moodle-docker.
 
-# Variables
-SCRIPT_DIR="$(pwd)"
-ENV_FILE="$SCRIPT_DIR/.env"
-SHELL_RC="/home/$SUDO_USER/.bashrc"
-TIMESTAMP=$(date "+%Y.%m.%d-%H.%M")
-MOODLE_VERSION=$(sed -n "s/.*\$release *= *'\([0-9.]*\).*/\1/p" /var/www/html/version.php)
-LOG_FILE="$INSTALL_DIR/logs/install.log"
-VER="V1.0"
-
 # Function: Prints the given text in bold on the console
 print_cmsg() {
   if [[ "$1" == "-n" ]]; then
@@ -32,6 +23,15 @@ else
     print_cmsg ".env file wasn't found in $SCRIPT_DIR/docker. Exiting."
     exit 1
 fi
+
+# Variables
+SCRIPT_DIR="$(pwd)"
+ENV_FILE="$SCRIPT_DIR/.env"
+SHELL_RC="/home/$SUDO_USER/.bashrc"
+TIMESTAMP=$(date "+%Y.%m.%d-%H.%M")
+MOODLE_VERSION=$(sed -n "s/.*\$release *= *'\([0-9.]*\).*/\1/p" /var/www/html/version.php)
+LOG_FILE="$INSTALL_DIR/logs/install.log"
+VER="V1.0"
 
 # Creating install log directory
 mkdir -p "$INSTALL_DIR/logs"
@@ -85,6 +85,7 @@ mkdir -p "$INSTALL_DIR/db_data"
 mkdir -p "$INSTALL_DIR/tools"
 mkdir -p "$INSTALL_DIR/tools/moodle-backup"
 mkdir -p "$INSTALL_DIR/tools/moodle-migration"
+mkdir -p "$INSTALL_DIR/tools/moodle-status"
 mkdir -p "$INSTALL_DIR/dumps"
 mkdir -p "$INSTALL_DIR/dumps/migration"
 mkdir -p "$INSTALL_DIR/logs/moodle"
@@ -95,9 +96,12 @@ mkdir -p "$INSTALL_DIR/logs/mariadb"
 print_cmsg "Copying files from $SCRIPT_DIR/docker to $INSTALL_DIR..." | tee -a "$LOG_FILE"
 cp -r "$SCRIPT_DIR/docker/"* "$INSTALL_DIR/"
 cp -r "$SCRIPT_DIR/moodle-backup" "$INSTALL_DIR/tools"
+cp -r "$SCRIPT_DIR/moodle-status" "$INSTALL_DIR/tools"
 cp -r "$SCRIPT_DIR/moodle-migration" "$INSTALL_DIR/tools"
 cp -r "$SCRIPT_DIR/.env" "$INSTALL_DIR"
-cp -r "$SCRIPT_DIR/.env" "$INSTALL_DIR/tools/moodle-migration"
+
+# Create system link for .env file
+ln -sf "$SCRIPT_DIR/.env" "$INSTALL_DIR/tools/moodle-migration/.env"
 
 # Changing port configuration
 print_cmsg "Adjusting Apache ports and Moodle config..." | tee -a "$LOG_FILE"
@@ -190,6 +194,7 @@ if ! grep -qE "^alias moodle-up=" "$SHELL_RC"; then
         echo "alias moodle-down='(cd \"$INSTALL_DIR\" && docker compose down)'"
         echo "alias moodle-backup='(\"$INSTALL_DIR\"/tools/moodle-backup/moodle-backup.sh)'"
         echo "alias moodle-restore='(\"$INSTALL_DIR\"/tools/moodle-backup/moodle-restore.sh)'"
+        echo "alias moodle-status='(\"$INSTALL_DIR\"/tools/moodle-status/moodle-status.sh)'"
     } >> "$SHELL_RC"
      print_cmsg "Aliases 'moodle-up', 'moodle-down', 'moodle-backup', and 'moodle-restore added to $SHELL_RC" | tee -a "$LOG_FILE"
 else

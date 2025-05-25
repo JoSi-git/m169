@@ -5,13 +5,11 @@
 # Last Update: 2025-05-25
 # Description: Restores the last saved state in /opt/moodle-docker/tools/moodle-backup.
 
-# Variables
-INSTALL_DIR="/opt/moodle-docker"
-BACKUP_DIR="$INSTALL_DIR/tools/moodle-backup"
-RESTORE_DIR="$INSTALL_DIR/tools/moodle-restore"
-
 # Read .env for MySQL Password
-source "$INSTALL_DIR/.env"
+source "$INSTALL_DIR/../../.env"
+
+
+# Restore process work in progress - Josi
 
 # Find Newest Backup-File
 LATEST_BACKUP=$(ls -t "$BACKUP_DIR"/*_FULL.tar.gz 2>/dev/null | head -n1)
