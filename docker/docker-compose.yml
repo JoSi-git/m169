@@ -14,7 +14,7 @@ services:
       - moodle-net
 
   moodle:
-    image: migration-moodle:latest
+    image: moodle-custom:latest
     container_name: moodle-web
     restart: always
     ports:
