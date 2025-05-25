@@ -5,6 +5,14 @@
 # Last Update: 2025-05-21
 # Description: Sets up the Moodle Docker environment under /opt/moodle-docker.
 
+# Variables
+SCRIPT_DIR="$(pwd)"
+ENV_FILE="$SCRIPT_DIR/.env"
+SHELL_RC="/home/$SUDO_USER/.bashrc"
+TIMESTAMP=$(date "+%Y.%m.%d-%H.%M")
+MOODLE_VERSION=$(sed -n "s/.*\$release *= *'\([0-9.]*\).*/\1/p" /var/www/html/version.php)
+VER="V1.0"
+
 # Function: Prints the given text in bold on the console
 print_cmsg() {
   if [[ "$1" == "-n" ]]; then
@@ -24,16 +32,8 @@ else
     exit 1
 fi
 
-# Variables
-SCRIPT_DIR="$(pwd)"
-ENV_FILE="$SCRIPT_DIR/.env"
-SHELL_RC="/home/$SUDO_USER/.bashrc"
-TIMESTAMP=$(date "+%Y.%m.%d-%H.%M")
-MOODLE_VERSION=$(sed -n "s/.*\$release *= *'\([0-9.]*\).*/\1/p" /var/www/html/version.php)
-LOG_FILE="$INSTALL_DIR/logs/install.log"
-VER="V1.0"
-
 # Creating install log directory
+LOG_FILE="$INSTALL_DIR/logs/install.log"
 mkdir -p "$INSTALL_DIR/logs"
 
 # Display title
@@ -79,6 +79,9 @@ sudo apt update && sudo apt install gum
 
 # Creating required directories in $INSTALL_DIR
 print_cmsg "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
+mkdir -p "$INSTALL_DIR/moodle"
+mkdir -p "$INSTALL_DIR/moodledata"
+mkdir -p "$INSTALL_DIR/db_data"
 mkdir -p "$INSTALL_DIR/tools"
 mkdir -p "$INSTALL_DIR/tools/moodle-backup"
 mkdir -p "$INSTALL_DIR/tools/moodle-migration"
@@ -167,6 +170,7 @@ docker image prune -a -f
 ##########################
 # upgrade to version 500 #
 ##########################
+
 # replace moodle version
 sed -i 's/--branch MOODLE_402_STABLE/--branch MOODLE_500_STABLE/' Dockerfile
 # replace mariadb version
