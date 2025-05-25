@@ -32,9 +32,10 @@ else
     exit 1
 fi
 
-# Creating install log directory
-LOG_FILE="$INSTALL_DIR/logs/install.log"
+# Creating install & log directory
+mkdir -p "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR/logs"
+LOG_FILE="$INSTALL_DIR/logs/install.log"
 
 # Display title
 clear
