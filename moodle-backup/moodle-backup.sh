@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Simples Moodle-Backup Script mit -f (Full) und -i (Incremental)
+#Variablen
 INSTALL_DIR="/opt/moodle-docker"
 BACKUP_DIR="$INSTALL_DIR/tools/moodle-backup"
 MOODLE_VERSION=$(sed -n "s/.*\$release *= *'\([0-9.]*\).*/\1/p" /var/www/html/version.php)
 TIMESTAMP=$(date "+%Y%m%d-%H%M")
 
-# Default: kein Modus gewählt
+#Entscheidung Full oder Incremental
 MODE=""
 
 while getopts "fi" opt; do
@@ -24,11 +24,11 @@ fi
 
 FILENAME="${MOODLE_VERSION}_${TIMESTAMP}_${MODE}.tar.gz"
 
-# Datenbank Dump (optional angepasst für INCREMENTAL)
+#Datenbank Dump
 mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" moodle > "$BACKUP_DIR/db.sql"
 
-# Alles in Archiv packen
+#Packen ins Archiv
 tar -czf "$BACKUP_DIR/$FILENAME" -C /var/www/html . -C "$BACKUP_DIR" db.sql
 
-# Aufräumen
+#Aufräumen
 rm "$BACKUP_DIR/db.sql"
