@@ -13,7 +13,7 @@ ENV_FILE="$SCRIPT_DIR/docker/.env"
 SHELL_RC="/home/$SUDO_USER/.bashrc"
 TIMESTAMP=$(date "+%Y.%m.%d-%H.%M")
 MOODLE_VERSION=$(sed -n "s/.*\$release *= *'\([0-9.]*\).*/\1/p" /var/www/html/version.php)
-BACKUP_DIR="${INSTALL_DIR}/dumps/${MOODLE_VERSION}-${TIMESTAMP}"
+BACKUP_DIR="${INSTALL_DIR}/dumps/"
 VER="V1.0"
 
 # Function: Prints the given text in bold on the console
@@ -122,7 +122,7 @@ systemctl reload apache2
 mkdir -p "$BACKUP_DIR"
 
 # Perform a MySQL dump of the Moodle database
-mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" "moodle" > $INSTALL_DIR/dumps/moodle_backup.sql
+mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" "moodle" > "${BACKUP_DIR}/${MOODLE_VERSION}-${TIMESTAMP}.sql
 
 
 # Moodle migration
