@@ -2,7 +2,7 @@
 
 # Moodle Docker Restore Script
 # Author: dka
-# Last Update: 2025-05-21
+# Last Update: 2025-05-25
 # Description: Restores the last saved state in /opt/moodle-docker/tools/moodle-backup.
 
 # Variables
