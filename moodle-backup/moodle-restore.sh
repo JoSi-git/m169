@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Moodle Docker Restore Script
+# Author: dka
+# Last Update: 2025-05-21
+# Description: Restores the last saved state in /opt/moodle-docker/tools/moodle-backup.
+
 # Variables
 INSTALL_DIR="/opt/moodle-docker"
 BACKUP_DIR="$INSTALL_DIR/tools/moodle-backup"
