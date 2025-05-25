@@ -99,10 +99,6 @@ cp -r "$SCRIPT_DIR/docker/"* "$INSTALL_DIR/"
 cp -r "$SCRIPT_DIR/moodle-backup" "$INSTALL_DIR/tools"
 cp -r "$SCRIPT_DIR/moodle-migration" "$INSTALL_DIR/tools"
 
-# Clone Moodle repository
-print_cmsg "Cloning Moodle repository..." | tee -a "$LOG_FILE"
-git clone -b MOODLE_403_STABLE https://github.com/moodle/moodle.git "$INSTALL_DIR/moodle"
-
 # Changing port configuration
 print_cmsg "Adjusting Apache ports and Moodle config..." | tee -a "$LOG_FILE"
 sed -i 's/^\s*Listen\s\+80$/Listen 8080/' /etc/apache2/ports.conf
@@ -122,16 +118,62 @@ awk '/{{> theme_boost\/navbar }}/ {print; print "<div style=\"background-color: 
 
 systemctl reload apache2
 
-# Moodle migration
-
 # Create the backup directory
 mkdir -p "$BACKUP_DIR"
 
 # Perform a MySQL dump of the Moodle database
-mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" > "${BACKUP_DIR}/moodle_dump.sql"
+mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" "moodle" > $INSTALL_DIR/dumps/moodle_backup.sql
 
-# Copy the moodledata directory to the backup location
-cp -r /var/www/moodledata "${INSTALL_DIR}/moodledata"
+
+# Moodle migration
+cd /opt/moodle-docker/migration
+###########################
+# upgrade to versuion 401 #
+###########################
+
+# start container
+docker compose up -d
+# upgrade database
+echo "upgrade moodle to 401. waiting..."
+sleep 5
+docker exec -u www-data moodle-migration php /var/www/html/admin/cli/upgrade.php --non-interactive
+# docker compose down
+docker compose down
+
+##########################
+# upgrade to version 402 #
+##########################
+
+# replace moodle version
+sed -i 's/--branch MOODLE_401_STABLE/--branch MOODLE_402_STABLE/' Dockerfile
+# replace apache version
+sed -i 's|^FROM moodlehq/moodle-php-apache:7\.4|FROM moodlehq/moodle-php-apache:8.2|' Dockerfile
+# rebuild docker image
+docker build -t migration-moodle:latest --no-cache -f Dockerfile .
+# restart container
+docker compose up -d
+# upgrade database
+echo "upgrade moodle to 402, waiting..."
+sleep 5
+docker exec -u www-data moodle-migration php /var/www/html/admin/cli/upgrade.php --non-interactive
+# docker compose down
+docker compose down
+
+##########################
+# upgrade to version 500 #
+##########################
+# replace moodle version
+sed -i 's/--branch MOODLE_402_STABLE/--branch MOODLE_500_STABLE/' Dockerfile
+# replace mariadb version
+sed -i 's|image: mariadb:10\.6|image: mariadb:10.11|' docker-compose.yml
+# rebuild docker image
+docker build -t migration-moodle:latest --no-cache -f Dockerfile .
+# restart container
+docker compose up -d
+# upgrade database
+echo "upgrade moodle to 500, waiting..."
+sleep 5
+docker exec -u www-data moodle-migration php /var/www/html/admin/cli/upgrade.php --non-interactive
 
 # Add aliases to ~/.bashrc (if not already present)
 if ! grep -qE "^alias moodle-up=" "$SHELL_RC"; then

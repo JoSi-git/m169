@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.6
+    container_name: moodle-db-migration
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - /opt/moodle-backup/dumps:/docker-entrypoint-initdb.d
+    networks:
+      - moodle-net
+
+  moodle:
+    build: .
+    container_name: moodle-migration
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      PHP_INI-upload_max_filesize: ${PHP_INI_upload_max_filesize}
+      PHP_INI-post_max_size: ${PHP_INI_post_max_size}
+    depends_on:
+      - db
+    networks:
+      - moodle-net
+      
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: pma-migration
+    restart: always
+    ports:
+      - "8081:80"                               # Du erreichst phpMyAdmin auf http://localhost:8081
+    environment:
+      PMA_HOST: db                              # muss genau dem Service-Namen Deiner MariaDB entsprechen
+      PMA_PORT: 3306
+      PMA_USER: ${MYSQL_USER}                   # optional, kannst Du freilassen und beim Login manuell eingeben
+      PMA_PASSWORD: ${MYSQL_PASSWORD}           # dito
+    depends_on:
+      - db
+    networks:
+      - moodle-net
+
+volumes:
+  db_data:
+
+networks:
+  moodle-net:
+    driver: bridge
