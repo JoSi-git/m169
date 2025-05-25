@@ -34,7 +34,7 @@ fi
 
 # Check if the script is running as root
 if [[ "$EUID" -ne 0 ]]; then
-  echo "This script must be run with sudo or as root." >&2
+  print_cmsg "This script must be run with sudo or as root." >&2
   exec sudo "$0" "$@"
   exit 1
 fi
@@ -55,6 +55,9 @@ $(printf '\033[38;5;33m')-------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------
 $(printf '\033[0m')
 EOF
+
+# User Notice
+print_cmsg "If you encounter any issues, please check the GitHub repository: https://github.com/JoSi-git/m169"
 
 # Ask if system updates should be performed
 print_cmsg -n "Do you want to perform system updates? (Y/n):"
