@@ -89,4 +89,19 @@ Typische Pfade:
 /opt/moodle-docker/moodledata/config.php (falls vorhanden)
 ```
 
----
+## 🏗️ 4 Backup und Restore
+
+> ⚠️ **Wichtig:**  
+> Die Moodle Instanz muss während dem Backup und dem Restore Prozess gestartet sein.
+
+### Backup durchführen
+
+```bash
+moodle-backup
+```
+
+### Restore durchführen
+
+```bash
+moodle-restore
+```
