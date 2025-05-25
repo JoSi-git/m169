@@ -19,9 +19,6 @@ services:
     restart: always
     ports:
       - "80:80"
-    environment:
-      PHP_INI-upload_max_filesize: ${PHP_INI-upload_max_filesize}
-      PHP_INI-post_max_size: ${PHP_INI-post_max_size}
     depends_on:
       - db
     networks:
