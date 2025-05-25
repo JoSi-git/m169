@@ -191,8 +191,8 @@ if ! grep -qE "^alias moodle-up=" "$SHELL_RC"; then
     {
         echo ""
         echo "# Moodle Docker aliases"
-        echo "alias moodle-up='(sudo cd \"$INSTALL_DIR\" && docker compose up -d && docker compose ps && xdg-open http://localhost)'"
-        echo "alias moodle-down='(sudo cd \"$INSTALL_DIR\" && docker compose down)'"
+        echo "alias moodle-up='(cd \"$INSTALL_DIR\" && docker compose up -d && docker compose ps && xdg-open http://localhost)'"
+        echo "alias moodle-down='(cd \"$INSTALL_DIR\" && docker compose down)'"
         echo "alias moodle-backup='(sudo \"$INSTALL_DIR\"/tools/moodle-backup/moodle-backup.sh)'"
         echo "alias moodle-restore='(sudo \"$INSTALL_DIR\"/tools/moodle-backup/moodle-restore.sh)'"
         echo "alias moodle-status='(sudo \"$INSTALL_DIR\"/tools/moodle-status/moodle-status.sh)'"
