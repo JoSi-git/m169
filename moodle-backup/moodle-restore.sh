@@ -1,36 +1,60 @@
 #!/bin/bash
 
-# Moodle Docker Restore Script
-# Author: dka
-# Last Update: 2025-05-25
-# Description: Restores the last saved state in /opt/moodle-docker/tools/moodle-backup.
+# Load environment variables
+source "./.env"
 
-# Read .env for MySQL Password
-source "$INSTALL_DIR/../../.env"
+# Container and database details
+DB_USER="$MYSQL_USER"
+DB_PASS="$MYSQL_ROOT_PASSWORD"
+DB_NAME="$MYSQL_DATABASE"
+MOODLE_CONTAINER="$CONTAINER_MOODLE"
+DB_CONTAINER="$CONTAINER_DB"
 
+# List available backups (most recent first)
+echo "Available backups:"
+ls -1t "$BACKUP_DIR"/*.tar.gz | head -n 20 | nl
+echo
 
-# Restore process work in progress - Josi
+# Ask user for selection
+read -p "Enter the number of the backup you want to restore: " SELECTION
 
-# Find Newest Backup-File
-LATEST_BACKUP=$(ls -t "$BACKUP_DIR"/*_FULL.tar.gz 2>/dev/null | head -n1)
+# Resolve filename
+BACKUP_FILE=$(ls -1t "$BACKUP_DIR"/*.tar.gz | head -n 20 | sed -n "${SELECTION}p")
 
-if [[ -z "$LATEST_BACKUP" ]]; then
-  echo "Kein Full-Backup gefunden in $BACKUP_DIR"
+# Validate selection
+if [ -z "$BACKUP_FILE" ]; then
+  echo "Invalid selection. Exiting."
   exit 1
 fi
 
-# Prepare Restore
-mkdir -p "$RESTORE_DIR"
-rm -rf "$RESTORE_DIR"/*
+echo "Restoring backup: $BACKUP_FILE"
 
-# Unpack Backup and Copy Files back
-tar -xzf "$LATEST_BACKUP" -C "$RESTORE_DIR"
-cp -r "$RESTORE_DIR"/* /var/www/html/
 
-# Restore DB
-if [[ -f "$RESTORE_DIR/db.sql" ]]; then
-  mysql -u root -p"$MYSQL_ROOT_PASSWORD" moodle < "$RESTORE_DIR/db.sql"
-fi
+echo "Stopping web server in container '$MOODLE_CONTAINER'..."
+docker exec "$MOODLE_CONTAINER" service apache2 stop
+
+# Create temporary restore directory
+TMP_DIR=$(mktemp -d)
+
+# Extract backup
+tar -xzf "$BACKUP_FILE" -C "$TMP_DIR"
+
+# Restore web files
+echo "Copying web files back into container..."
+docker cp "$TMP_DIR/moodle" "$MOODLE_CONTAINER":/var/www/html
+
+# Set correct permissions
+docker exec "$MOODLE_CONTAINER" chown -R www-data:www-data /var/www/html
+
+# Restore database
+echo "Importing SQL dump into database..."
+cat "$TMP_DIR/db.sql" | docker exec -i "$DB_CONTAINER" \
+  bash -c "mysql -u$DB_USER -p$DB_PASS $DB_NAME"
 
 # Cleanup
-rm -rf "$RESTORE_DIR"/*
+rm -rf "$TMP_DIR"
+
+echo "Starting web server in container '$MOODLE_CONTAINER'..."
+docker exec "$MOODLE_CONTAINER" service apache2 start
+
+echo "Restore complete."

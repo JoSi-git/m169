@@ -1,7 +1,7 @@
 services:
   db:
     image: mariadb:10.11
-    container_name: moodle-db
+    container_name: ${CONTAINER_DB}
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -15,7 +15,7 @@ services:
 
   moodle:
     image: moodle-custom:latest
-    container_name: moodle-web
+    container_name: ${CONTAINER_MOODLE}
     restart: always
     ports:
       - "80:80"

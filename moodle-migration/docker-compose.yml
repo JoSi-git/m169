@@ -10,7 +10,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
-      - /opt/moodle-docker/dumps/migration:/docker-entrypoint-initdb.d
+      - ${INSTALL_DIR}/dumps/migration:/docker-entrypoint-initdb.d
     networks:
       - moodle-net
 

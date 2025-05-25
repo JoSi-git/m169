@@ -99,6 +99,7 @@ cp -r "$SCRIPT_DIR/.env" "$INSTALL_DIR"
 
 # Create system link for .env file
 ln -sf "$SCRIPT_DIR/.env" "$INSTALL_DIR/tools/moodle-migration/.env"
+ln -sf "$SCRIPT_DIR/.env" "$INSTALL_DIR/tools/moodle-backup/.env"
 
 # Changing port configuration
 print_cmsg "Adjusting Apache ports and Moodle config..." | tee -a "$LOG_FILE"
