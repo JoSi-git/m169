@@ -6,14 +6,12 @@
 # Description: Sets up the Moodle Docker environment under /opt/moodle-docker.
 
 # Variables
-INSTALL_DIR="/opt/moodle-docker"
-LOG_FILE="$INSTALL_DIR/logs/install.log"
 SCRIPT_DIR="$(pwd)"
 ENV_FILE="$SCRIPT_DIR/.env"
 SHELL_RC="/home/$SUDO_USER/.bashrc"
 TIMESTAMP=$(date "+%Y.%m.%d-%H.%M")
 MOODLE_VERSION=$(sed -n "s/.*\$release *= *'\([0-9.]*\).*/\1/p" /var/www/html/version.php)
-BACKUP_DIR="${INSTALL_DIR}/dumps/"
+LOG_FILE="$INSTALL_DIR/logs/install.log"
 VER="V1.0"
 
 # Function: Prints the given text in bold on the console
@@ -25,6 +23,15 @@ print_cmsg() {
     echo -e "\e[1m$*\e[0m"
   fi
 }
+
+# Load environment variables from .env file
+if [[ -f "$ENV_FILE" ]]; then
+    source "$ENV_FILE"
+    print_cmsg ".env file found and loaded."
+else
+    print_cmsg ".env file wasn't found in $SCRIPT_DIR/docker. Exiting."
+    exit 1
+fi
 
 # Creating install log directory
 mkdir -p "$INSTALL_DIR/logs"
@@ -55,7 +62,6 @@ print_cmsg -n "Do you want to perform system updates? (Y/n):"
 read update_choice
 update_choice=${update_choice:-Y}
 
-
 # Perform system update if chosen
 if [[ "$update_choice" =~ ^[Yy]$ ]]; then
     print_cmsg "Performing system update..." | tee -a "$LOG_FILE"
@@ -70,15 +76,6 @@ sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
 echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
 sudo apt update && sudo apt install gum
-
-# Load environment variables from .env file
-if [[ -f "$ENV_FILE" ]]; then
-    source "$ENV_FILE"
-    print_cmsg ".env file found and loaded." | tee -a "$LOG_FILE"
-else
-    print_cmsg ".env file wasn't found in $SCRIPT_DIR/docker. Exiting." | tee -a "$LOG_FILE"
-    exit 1
-fi
 
 # Creating required directories in $INSTALL_DIR
 print_cmsg "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
@@ -101,7 +98,6 @@ cp -r "$SCRIPT_DIR/moodle-backup" "$INSTALL_DIR/tools"
 cp -r "$SCRIPT_DIR/moodle-migration" "$INSTALL_DIR/tools"
 cp -r "$SCRIPT_DIR/.env" "$INSTALL_DIR"
 cp -r "$SCRIPT_DIR/.env" "$INSTALL_DIR/tools/moodle-migration"
-
 
 # Changing port configuration
 print_cmsg "Adjusting Apache ports and Moodle config..." | tee -a "$LOG_FILE"
@@ -132,7 +128,7 @@ mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" "moodle" > "${BACKUP_DIR}/migration/$
 # Moodle migration
 cd $INSTALL_DIR/tools/moodle-migration
 ###########################
-# upgrade to versuion 401 #
+# upgrade to version 401 #
 ###########################
 
 # build image
@@ -140,8 +136,8 @@ docker build -t migration-moodle:latest --no-cache -f Dockerfile .
 # start container
 docker compose up -d
 # upgrade database
-echo "upgrade moodle to 401. waiting..."
-sleep 5
+print_cmsg "upgrade moodle to 401. waiting..." | tee -a "$LOG_FILE"
+sleep 10
 docker exec -u www-data moodle-migration php /var/www/html/admin/cli/upgrade.php --non-interactive
 # docker compose down
 docker compose down
@@ -159,8 +155,8 @@ docker build -t migration-moodle:latest --no-cache -f Dockerfile .
 # restart container
 docker compose up -d
 # upgrade database
-echo "upgrade moodle to 402, waiting..."
-sleep 5
+print_cmsg "upgrade moodle to 402, waiting..." | tee -a "$LOG_FILE"
+sleep 10
 docker exec -u www-data moodle-migration php /var/www/html/admin/cli/upgrade.php --non-interactive
 # docker compose down
 docker compose down
@@ -179,8 +175,8 @@ docker build -t migration-moodle:latest --no-cache -f Dockerfile .
 # restart container
 docker compose up -d
 # upgrade database
-echo "upgrade moodle to 500, waiting..."
-sleep 5
+print_cmsg "upgrade moodle to 500, waiting..." | tee -a "$LOG_FILE"
+sleep 10
 docker exec -u www-data moodle-migration php /var/www/html/admin/cli/upgrade.php --non-interactive
 # docker compose down
 docker compose down
@@ -199,7 +195,6 @@ if ! grep -qE "^alias moodle-up=" "$SHELL_RC"; then
 else
     print_cmsg "Aliases already exist in $SHELL_RC - skipping addition." | tee -a "$LOG_FILE"
 fi
-
 
 # Note on activation
 print_cmsg "Run 'source ~/.bashrc' or restart your terminal to activate the new aliases." | tee -a "$LOG_FILE"

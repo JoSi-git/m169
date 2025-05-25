@@ -6,7 +6,7 @@ $CFG = new stdClass();
 
 $CFG->dbtype    = 'mariadb';
 $CFG->dblibrary = 'native';
-$CFG->dbhost    = 'db'; // Docker service name
+$CFG->dbhost    = 'db';
 $CFG->dbname    = 'moodle';
 $CFG->dbuser    = 'vmadmin';
 $CFG->dbpass    = 'Riethuesli>12345';

@@ -40,3 +40,9 @@ Danach kann das Skript wie folgt ausgeführt werden:
 ```bash
 ./install.sh
 ```
+
+Path anpassungen
+
+alle pfade variablen und passwörter welche geändert werden könne leigen in der .env file
+
+bei anpassung der pfadvariable muss diese ebenfalls innerhalb docker 
