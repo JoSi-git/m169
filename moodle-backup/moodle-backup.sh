@@ -20,14 +20,15 @@ print_cmsg() {
   fi
 }
 
-# Load environment variables from .env file
-if [[ -f "$ENV_FILE" ]]; then
-    source "$ENV_FILE"
-    print_cmsg ".env file found and loaded."
+# Load environment variables from .env file in local directory
+if [[ -f "./.env" ]]; then
+    source "./.env"
+    print_cmsg ".env file found and loaded from local directory."
 else
-    print_cmsg ".env file wasn't found in $SCRIPT_DIR/docker. Exiting."
+    print_cmsg ".env file wasn't found in local directory. Exiting."
     exit 1
 fi
+
 
 # Check if the script is running as root
 if [[ "$EUID" -ne 0 ]]; then
