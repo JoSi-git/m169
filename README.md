@@ -2,14 +2,10 @@
   <img src="https://github.com/JoSi-git/m169/blob/main/img/m169-title.png" />
 </div>
 
-<div align="center"> 
 [![](https://img.shields.io/badge/Silas_Gubler-FF7F50?style=for-the-badge)](https://github.com/arkaizn)
 [![](https://img.shields.io/badge/David_Kästli-00FA9A?style=for-the-badge)](https://github.com/dka-git)
 [![](https://img.shields.io/badge/Jonas_Sieber-4682B4?style=for-the-badge)](https://github.com/josi-git)
 [![](https://img.shields.io/badge/Lizenz-DAA520?style=for-the-badge)](https://github.com/JoSi-git/m346/blob/main/LICENSE)
-</a>
-
-</div>
 
 
 ## 🔍 1 Ausgangslage
