@@ -35,8 +35,9 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 
 # Load environment variables
+set -o allexport
 source "./.env"
-
+set +0 allexport
 # Container and database details
 DB_USER="$MYSQL_ROOT_USER"
 DB_PASS="$MYSQL_ROOT_PASSWORD"
