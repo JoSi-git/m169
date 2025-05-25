@@ -32,8 +32,14 @@ else
     exit 1
 fi
 
+# Check if the script is running as root
+if [[ "$EUID" -ne 0 ]]; then
+  echo "This script must be run with sudo or as root." >&2
+  exec sudo "$0" "$@"
+  exit 1
+fi
+
 # Creating install & log directory
-mkdir -p "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR/logs"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 
@@ -49,14 +55,6 @@ $(printf '\033[38;5;33m')-------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------
 $(printf '\033[0m')
 EOF
-
-
-# Check if the script is running as root
-if [[ "$EUID" -ne 0 ]]; then
-  echo "This script must be run with sudo or as root." >&2
-  exec sudo "$0" "$@"
-  exit 1
-fi
 
 # Ask if system updates should be performed
 print_cmsg -n "Do you want to perform system updates? (Y/n):"
