@@ -38,3 +38,5 @@ services:
 
 volumes:
   db_data:
+    external: true   
+    name: moodle-docker_db_data
