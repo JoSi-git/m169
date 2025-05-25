@@ -79,9 +79,6 @@ sudo apt update && sudo apt install gum
 
 # Creating required directories in $INSTALL_DIR
 print_cmsg "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
-mkdir -p "$INSTALL_DIR/moodle"
-mkdir -p "$INSTALL_DIR/moodledata"
-mkdir -p "$INSTALL_DIR/db_data"
 mkdir -p "$INSTALL_DIR/tools"
 mkdir -p "$INSTALL_DIR/tools/moodle-backup"
 mkdir -p "$INSTALL_DIR/tools/moodle-migration"
