@@ -135,6 +135,8 @@ cd $INSTALL_DIR/tools/moodle-migration
 # upgrade to versuion 401 #
 ###########################
 
+# build image
+docker build -t migration-moodle:latest --no-cache -f Dockerfile .
 # start container
 docker compose up -d
 # upgrade database
