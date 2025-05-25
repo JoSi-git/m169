@@ -29,14 +29,6 @@ else
     exit 1
 fi
 
-
-# Check if the script is running as root
-if [[ "$EUID" -ne 0 ]]; then
-  print_cmsg "This script must be run with sudo or as root." >&2
-  exec sudo "$0" "$@"
-  exit 1
-fi
-
 # Load environment variables from .env file
 source "./.env"
 
