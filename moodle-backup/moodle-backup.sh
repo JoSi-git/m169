@@ -1,19 +1,33 @@
 #!/bin/bash
 
-# Moodle Docker Backup Script
+# Moodle Docker backup script
 # Author: dka
 # Last Update: 2025-05-25
 # Description: Moodle backup tool
 
-# Load environment variables from .env file
-source "./.env"
+clear
 
-# Container and database details
-DB_USER="$MYSQL_USER"
-DB_PASS="$MYSQL_ROOT_PASSWORD"
-DB_NAME="$MYSQL_DATABASE"
-MOODLE_CONTAINER="$CONTAINER_MOODLE"
-DB_CONTAINER="$CONTAINER_DB"
+# Title
+gum style --border normal --margin "1" --padding "1 2" --border-foreground 33 "Moodle Docker Backup Tool"
+
+# Function: Prints the given text in bold on the console
+print_cmsg() {
+  if [[ "$1" == "-n" ]]; then
+    shift
+    echo -ne "\e[1m$*\e[0m"
+  else
+    echo -e "\e[1m$*\e[0m"
+  fi
+}
+
+# Load environment variables from .env file
+if [[ -f "$ENV_FILE" ]]; then
+    source "$ENV_FILE"
+    print_cmsg ".env file found and loaded."
+else
+    print_cmsg ".env file wasn't found in $SCRIPT_DIR/docker. Exiting."
+    exit 1
+fi
 
 # Check if the script is running as root
 if [[ "$EUID" -ne 0 ]]; then
@@ -22,8 +36,18 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
+# Load environment variables from .env file
+source "./.env"
+
+# Container and database details
+DB_USER="$MYSQL_ROOT_USER"
+DB_PASS="$MYSQL_ROOT_PASSWORD"
+DB_NAME="$MYSQL_DATABASE"
+MOODLE_CONTAINER="$CONTAINER_MOODLE"
+DB_CONTAINER="$CONTAINER_DB"
+
 # Stop web service
-echo "Stopping web server in container '$MOODLE_CONTAINER'..."
+print_cmsg "Stopping web server in container '$MOODLE_CONTAINER'..."
 docker exec "$MOODLE_CONTAINER" service apache2 stop
 
 # Get Moodle version from inside the container
@@ -34,18 +58,18 @@ MOODLE_VERSION=$(docker exec "$MOODLE_CONTAINER" \
 TIMESTAMP=$(date "+%Y%m%d-%H%M")
 FILENAME="${MOODLE_VERSION}_${TIMESTAMP}_FULL.tar.gz"
 
-echo "Creating database dump from container '$DB_CONTAINER'..."
+print_cmsg "Creating database dump from container '$DB_CONTAINER'..."
 
 # Dump the database
 docker exec "$DB_CONTAINER" \
   bash -c "mysqldump -u$DB_USER -p$DB_PASS $DB_NAME" > "$BACKUP_DIR/db.sql"
 
-echo "Copying Moodle files from container '$MOODLE_CONTAINER'..."
+print_cmsg "Copying Moodle files from container '$MOODLE_CONTAINER'..."
 
 # Copy Moodle web files
 docker cp "$MOODLE_CONTAINER":/var/www/html "$BACKUP_DIR/moodle"
 
-echo "Creating archive..."
+print_cmsg "Creating archive..."
 
 # Create compressed archive with both db.sql and web files
 tar -czf "$BACKUP_DIR/$FILENAME" -C "$BACKUP_DIR" moodle db.sql
@@ -54,7 +78,7 @@ tar -czf "$BACKUP_DIR/$FILENAME" -C "$BACKUP_DIR" moodle db.sql
 rm -rf "$BACKUP_DIR/db.sql" "$BACKUP_DIR/moodle"
 
 # Start web service again
-echo "Starting web server in container '$MOODLE_CONTAINER'..."
+print_cmsg "Starting web server in container '$MOODLE_CONTAINER'..."
 docker exec "$MOODLE_CONTAINER" service apache2 start
 
-echo "Backup complete: $BACKUP_DIR/$FILENAME"
+print_cmsg "Backup complete: $BACKUP_DIR/$FILENAME"
