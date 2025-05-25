@@ -3,7 +3,7 @@
 # Moodle Docker Backup Script
 # Author: dka
 # Last Update: 2025-05-21
-# Description: Creates a Full Backup of the Database.
+# Description: Creates a Full Backup of the Database in /opt/moodle-docker/tools/moodle-backup.
 
 # Moodle Full Backup Script
 INSTALL_DIR="/opt/moodle-docker"
