@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: mariadb:10.11
-    container_name: moodle-db-migration
+    container_name: moodle-db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -17,7 +17,7 @@ services:
 
   moodle:
     image: migration-moodle:latest
-    container_name: moodle-migration
+    container_name: moodle-web
     restart: always
     ports:
       - "80:80"
