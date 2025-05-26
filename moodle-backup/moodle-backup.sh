@@ -131,16 +131,25 @@ if [[ "$MODE" == "moodle" || "$MODE" == "full" ]]; then
   docker cp "$CONTAINER_MOODLE":/var/www/html "$TMP_DIR/moodle"
 fi
 
-# Create archive properly without `./` as root folder
-print_cmsg "Creating archive..."
-tar -czf "$BACKUP_DIR/$FILENAME" -C "$TMP_DIR" "${FILES_TO_ARCHIVE[@]}"
-
-# Cleanup
-rm -rf "$TMP_DIR"
-
 # Restart Apache
 print_cmsg "Starting web server in container '$CONTAINER_MOODLE'..."
 docker exec "$CONTAINER_MOODLE" service apache2 start
 
-# Done
-print_cmsg "Backup complete: $BACKUP_DIR/$FILENAME"
+# Create archive properly without `./` as root folder
+print_cmsg "Creating archive..."
+
+# Prepare list of files to archive
+FILES_TO_ARCHIVE=()
+if [[ "$MODE" == "db" || "$MODE" == "full" ]]; then
+  FILES_TO_ARCHIVE+=("db.sql")
+fi
+if [[ "$MODE" == "moodle" || "$MODE" == "full" ]]; then
+  FILES_TO_ARCHIVE+=("moodle")
+fi
+
+if tar -czf "$BACKUP_DIR/$FILENAME" -C "$TMP_DIR" "${FILES_TO_ARCHIVE[@]}"; then
+  print_cmsg "Backup complete: $BACKUP_DIR/$FILENAME"
+  rm -rf "$TMP_DIR"
+else
+  echo "Error: Failed to create backup. Temporary files remain in $TMP_DIR for analysis."
+fi
