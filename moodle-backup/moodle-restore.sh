@@ -30,28 +30,38 @@ fi
 # Load environment variables
 source "./.env"
 
-# List available backups (most recent first)
+# Get list of backups sorted by modification time (most recent first), limited to 20
+BACKUPS=($(ls -1t "$BACKUP_DIR"/*.tar.gz | head -n 20))
+
+# Display available backups
 gum style --border normal --padding "1 2" --border-foreground 33 <<EOF
-$(ls -1t "$BACKUP_DIR"/*.tar.gz | head -n 20 | nl)
+0. Exit
+$(printf '%s\n' "${BACKUPS[@]}" | nl -w1 -s'. ')
 EOF
 
 echo
 
-# Ask user for selection
-read -p "Enter the number of the backup you want to restore: " SELECTION
+# Prompt user for selection
+read -p "Enter the number of the backup you want to restore (0 to exit): " SELECTION
 
-# Resolve filename
-BACKUP_FILE=$(ls -1t "$BACKUP_DIR"/*.tar.gz | head -n 20 | sed -n "${SELECTION}p")
+# Handle exit option
+if [[ "$SELECTION" == "0" ]]; then
+  echo "Exiting..."
+  exit 0
+fi
 
-# Validate selection
-if [ -z "$BACKUP_FILE" ]; then
+# Validate input: must be a number and within valid range
+if ! [[ "$SELECTION" =~ ^[0-9]+$ ]] || (( SELECTION < 1 || SELECTION > ${#BACKUPS[@]} )); then
   print_cmsg "Invalid selection. Exiting."
   exit 1
 fi
 
+# Get the selected backup file (arrays are zero-indexed)
+BACKUP_FILE="${BACKUPS[$((SELECTION-1))]}"
+
 print_cmsg "Restoring backup: $BACKUP_FILE"
 
-
+# Stopping Apache2 webserver
 print_cmsg "Stopping web server in container '$CONTAINER_MOODLE'..."
 docker exec "$CONTAINER_MOODLE" service apache2 stop
 
