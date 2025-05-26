@@ -53,24 +53,32 @@ case "$1" in
 
 esac
 
-# Interactive menu if no parameter was given
 if [[ "$MODE" == "interactive" ]]; then
-  MODE=$(gum choose --cursor ">" \
-    --header "What would you like to backup?" \
-    --header.foreground 15 \
-    --prompt.foreground 33 \
-    --cursor.foreground 33 \
-    "Full backup (DB + moodledata)" \
-    "Only database" \
-    "Only moodledata" \
-    "Exit")
+  OPTIONS=(
+    "Full backup (DB + moodledata)"
+    "Only database"
+    "Only moodledata"
+    "Exit"
+  )
 
-  case "$MODE" in
-    "Full backup (DB + moodledata)") MODE="full";;
-    "Only database") MODE="db";;
-    "Only moodledata") MODE="moodle";;
-    "Exit") echo "Exiting..."; exit 0;;
-    *) echo "Invalid selection. Exiting."; exit 1;;
+  # Display menu with border and numbered list using gum
+  gum style --border normal --padding "1 2" --border-foreground 33 <<EOF
+What would you like to backup?
+
+$(printf '%s\n' "${OPTIONS[@]}" | nl -w1 -s'. ')
+EOF
+
+  echo
+  # Prompt user to enter their choice number
+  read -p "Enter the number of your choice: " SELECTION
+
+  # Map the numeric choice to the corresponding MODE value
+  case "$SELECTION" in
+    1) MODE="full" ;;
+    2) MODE="db" ;;
+    3) MODE="moodle" ;;
+    4) echo "Exiting..."; exit 0 ;;
+    *) echo "Invalid selection. Exiting."; exit 1 ;;
   esac
 fi
 
