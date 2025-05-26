@@ -55,7 +55,9 @@ esac
 
 # Interactive menu if no parameter was given
 if [[ "$MODE" == "interactive" ]]; then
-  MODE=$(gum choose --cursor ">" --header "What would you like to backup?" \
+MODE=$(gum choose --cursor ">" --limit 1 \
+    --header "$MENU_HEADER" \
+    --header-foreground 15 \
     "Full backup (DB + moodledata)" \
     "Only database" \
     "Only moodledata" \
@@ -65,8 +67,8 @@ if [[ "$MODE" == "interactive" ]]; then
     "Full backup (DB + moodledata)") MODE="full";;
     "Only database") MODE="db";;
     "Only moodledata") MODE="moodle";;
-    "Exit") print_cmsg "Exiting..."; exit 0;;
-    *) print_cmsg "Invalid selection. Exiting."; exit 1;;
+    "Exit") echo "Exiting..."; exit 0;;
+    *) echo "Invalid selection. Exiting."; exit 1;;
   esac
 fi
 
@@ -115,16 +117,9 @@ if [[ "$MODE" == "moodle" || "$MODE" == "full" ]]; then
   docker cp "$CONTAINER_MOODLE":/var/www/html "$TMP_DIR/moodle"
 fi
 
-# Create archive
+# Create archive properly without `./` as root folder
 print_cmsg "Creating archive..."
-
-cd "$TMP_DIR"
-FILES_TO_ARCHIVE=()
-[[ -f db.sql ]] && FILES_TO_ARCHIVE+=("db.sql")
-[[ -d moodle ]] && FILES_TO_ARCHIVE+=("moodle")
-
-tar -czf "$BACKUP_DIR/$FILENAME" "${FILES_TO_ARCHIVE[@]}"
-cd -
+tar -czf "$BACKUP_DIR/$FILENAME" -C "$TMP_DIR" "${FILES_TO_ARCHIVE[@]}"
 
 # Cleanup
 rm -rf "$TMP_DIR"
