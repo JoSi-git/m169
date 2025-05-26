@@ -136,7 +136,7 @@ TMP_DIR=$(mktemp -d)
 # Backup DB
 if [[ "$MODE" == "db" || "$MODE" == "full" ]]; then
   print_cmsg "Creating database dump from container '$CONTAINER_DB'..." | tee -a "$LOG_FILE"
-  docker exec "$CONTAINER_DB" \ 
+  docker exec "$CONTAINER_DB" \
     bash -c "mysqldump -u$MYSQL_ROOT_USER -p'$MYSQL_ROOT_PASSWORD' $MYSQL_DATABASE > /tmp/dump.sql"
   docker cp "$CONTAINER_DB":/tmp/dump.sql "$TMP_DIR/db.sql"
 fi
