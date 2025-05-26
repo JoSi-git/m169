@@ -7,13 +7,16 @@
 clear
 
 # Title (only shown if interactive)
-if [ -t 1 ]; then
-  gum style --border normal --margin "1" --padding "1 2" --border-foreground 33 "Moodle Docker Backup Tool"
-fi
+printf '\033[38;5;33mMoodle Docker Backup Tool\n-------------------------------\n\033[0m'
 
-# Function to print messages in bold
+# Function: Prints the given text in bold on the console
 print_cmsg() {
-  if [[ "$1" == "-n" ]]; then shift; echo -ne "\e[1m$*\e[0m"; else echo -e "\e[1m$*\e[0m"; fi
+  if [[ "$1" == "-n" ]]; then
+    shift
+    echo -ne "\e[1m$*\e[0m"
+  else
+    echo -e "\e[1m$*\e[0m"
+  fi
 }
 
 # Load environment variables from .env
@@ -82,10 +85,6 @@ EOF
   esac
 fi
 
-# Stop Apache
-print_cmsg "\nStopping web server in container '$CONTAINER_MOODLE'..."
-docker exec "$CONTAINER_MOODLE" service apache2 stop
-
 # Get Moodle version from inside the container
 MOODLE_VERSION=$(docker exec "$CONTAINER_MOODLE" \
   bash -c "sed -n \"s/.*\\\$release *= *'\([0-9.]*\).*/\1/p\" /var/www/html/version.php")
@@ -110,12 +109,17 @@ esac
 
 FILENAME="${MOODLE_VERSION}_${TIMESTAMP}_${SUFFIX}.tar.gz"
 
+# Stop Apache
+print_cmsg "\nStopping web server in container '$CONTAINER_MOODLE'..."
+docker exec "$CONTAINER_MOODLE" service apache2 stop
+echo
+
 # Paths
 TMP_DIR=$(mktemp -d)
 
 # Backup DB
 if [[ "$MODE" == "db" || "$MODE" == "full" ]]; then
-  print_cmsg "\nCreating database dump from container '$CONTAINER_DB'..."
+  print_cmsg "Creating database dump from container '$CONTAINER_DB'..."
   docker exec "$CONTAINER_DB" \
     bash -c "mysqldump -u$MYSQL_ROOT_USER -p'$MYSQL_ROOT_PASSWORD' $MYSQL_DATABASE > /tmp/dump.sql"
   docker cp "$CONTAINER_DB":/tmp/dump.sql "$TMP_DIR/db.sql"
