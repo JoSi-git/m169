@@ -81,7 +81,7 @@ docker exec "$CONTAINER_MOODLE" chown -R www-data:www-data /var/www/html
 # Restore database
 print_cmsg "Importing SQL dump into database..."
 cat "$TMP_DIR/db.sql" | docker exec -i "$CONTAINER_DB" \
-  bash -c "mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE"
+  bash -c "mysql -u$MYSQL_ROOT_USER -p'$MYSQL_ROOT_PASSWORD' $MYSQL_DATABASE"
 
 # Cleanup
 rm -rf "$TMP_DIR"
