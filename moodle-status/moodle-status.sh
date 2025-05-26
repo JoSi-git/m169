@@ -7,6 +7,15 @@
 
 clear
 
+# Load environment variables from .env
+if [[ -f "./.env" ]]; then
+  source "./.env"
+  print_cmsg ".env file found and loaded from local directory."
+else
+  print_cmsg ".env file wasn't found in local directory. Exiting."
+  exit 1
+fi
+
 # Config and color setup
 WIDTH=100
 BLUE="33"
@@ -30,8 +39,8 @@ title_box=$(gum style --border normal --padding "1 3" --width $WIDTH \
   --foreground $BLUE --bold <<< "$centered_title"$'\n\n'"$warning_text")
 
 # Docker Compose status check (no spinner)
-if docker compose ps --format "{{.Service}}" &>/dev/null; then
-  count=$(docker compose ps --format "{{.Service}}" | wc -l)
+if docker compose ls --format "{{.Service}}" &>/dev/null; then
+  count=$(docker compose ls --format "{{.Service}}" | wc -l)
   if [ "$count" -gt 0 ]; then
     compose_icon="✔"
     compose_message="Docker Compose is running"
@@ -75,27 +84,34 @@ choice=$(gum choose --header "What would you like to do?" \
   "[3] Stop Moodle" \
   "[4] Create Backup" \
   "[5] Restore Backup" \
-  "[6] Exit")
+  "[6] Run Moodle Cronjob" \
+  "[7] Exit")
+
+# Action handler
+
 
 # Action handler
 case "$choice" in
   "[1] Open Documentation")
-    xdg-open "https://github.com/JoSi-git/m169/blob/main/README.md" >/dev/null 2>&1 &
+    firefox "https://github.com/JoSi-git/m169/blob/main/README.md" >/dev/null 2>&1 &
     ;;
   "[2] Start Moodle")
-    moodle-up
-    gum confirm "Show logs?" && docker compose logs -f
+    gum confirm "Show logs?" && (cd "$INSTALL_DIR" && docker compose logs -f)
     ;;
   "[3] Stop Moodle")
-    moodle-down
+    (cd "$INSTALL_DIR" && docker compose down)
     ;;
   "[4] Create Backup")
-    moodle-backup
+    sudo "$INSTALL_DIR/tools/moodle-backup/moodle-backup.sh"
     ;;
   "[5] Restore Backup")
-    moodle-restore
+    sudo "$INSTALL_DIR/tools/moodle-backup/moodle-restore.sh"
     ;;
-  "[6] Exit")
-    gum style --foreground $VALUE_COLOR <<< "Goodbye!"
+  "[6] Run Moodle Cronjob")
+    sudo "$INSTALL_DIR/tools/moodle-backup/moodle-cronjob.sh"
+    ;;
+  "[7] Exit")
+    gum style --foreground "$VALUE_COLOR" <<< "Goodbye!"
     ;;
 esac
+

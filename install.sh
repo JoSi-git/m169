@@ -103,6 +103,7 @@ cp -r "$SCRIPT_DIR/.env" "$INSTALL_DIR"
 # Create system link for .env file
 ln -sf "$SCRIPT_DIR/.env" "$INSTALL_DIR/tools/moodle-migration/.env"
 ln -sf "$SCRIPT_DIR/.env" "$INSTALL_DIR/tools/moodle-backup/.env"
+ln -sf "$SCRIPT_DIR/.env" "$INSTALL_DIR/tools/moodle-status/.env"
 
 # Changing port configuration
 print_cmsg "Adjusting Apache ports and Moodle config..." | tee -a "$LOG_FILE"
@@ -192,10 +193,11 @@ if ! grep -q "moodle-up()" "$SHELL_RC"; then
     {
         echo ""
         echo "# Moodle Docker functions"
-        echo "moodle-up() { (cd \"$INSTALL_DIR\" && docker compose up -d && docker compose ps && xdg-open http://localhost); }"
+        echo "moodle-up() { (cd \"$INSTALL_DIR\" && docker compose up -d && docker compose ps && firefox http://localhost); }"
         echo "moodle-down() { (cd \"$INSTALL_DIR\" && docker compose down); }"
         echo "moodle-backup() { sudo \"$INSTALL_DIR/tools/moodle-backup/moodle-backup.sh\" \"\$@\"; }"
         echo "moodle-restore() { sudo \"$INSTALL_DIR/tools/moodle-backup/moodle-restore.sh\" \"\$@\"; }"
+        echo "moodle-cronjob() { sudo \"$INSTALL_DIR/tools/moodle-backup/moodle-cronjob.sh\" \"\$@\"; }"
         echo "moodle-status() { sudo \"$INSTALL_DIR/tools/moodle-status/moodle-status.sh\" \"\$@\"; }"
     } >> "$SHELL_RC"
     print_cmsg "Functions 'moodle-up', 'moodle-down', 'moodle-backup', 'moodle-status' etc. added to $SHELL_RC" | tee -a "$LOG_FILE"
