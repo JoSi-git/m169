@@ -30,7 +30,7 @@ fi
 
 # Local Variables
 MODE="interactive"
-LOG_FILE="$LOG_DIR/running-backup.log"
+LOG_FILE="$LOG_DIR/moodle-backup/running-backup.log"
 
 
 # Argument parsing
@@ -171,4 +171,4 @@ else
 fi
 
 # Renaming log file
-mv "$LOG_FILE" "$LOG_DIR/$FILENAME.log"
+mv "$LOG_FILE" "$LOG_DIR/moodle-backup/$FILENAME.log"
