@@ -4,7 +4,6 @@
 # Author: JoSi
 # Last Update: 2025-05-26
 # Description: Simple terminal backup tool
-clear
 
 # Title (only shown if interactive)
 printf '\033[38;5;33mMoodle Docker Backup Tool\n-------------------------------\n\033[0m'
