@@ -28,8 +28,10 @@ else
   exit 1
 fi
 
-# Default mode
+# Local Variables
 MODE="interactive"
+LOG_FILE="$LOG_DIR/running-backup.log"
+
 
 # Argument parsing
 case "$1" in
@@ -55,6 +57,44 @@ case "$1" in
     ;;
 
 esac
+
+# Feedback if a mode was selected via CLI argument
+if [[ "$MODE" != "interactive" ]]; then
+  case "$MODE" in
+    full)
+      print_cmsg "Mode: Full backup (DB + Moodle files)" | tee -a "$LOG_FILE"
+      ;;
+    db)
+      print_cmsg "Mode: Only database" | tee -a "$LOG_FILE"
+      ;;
+    moodle)
+      print_cmsg "Mode: Only Moodle files" | tee -a "$LOG_FILE"
+      ;;
+  esac
+fi
+
+case "$MODE" in
+  full)
+    SUFFIX="FULL"
+    ;;
+  moodle)
+    SUFFIX="MOODLE"
+    ;;
+  db)
+    SUFFIX="DUMP"
+    ;;
+  *)
+    SUFFIX="BACKUP"
+    ;;
+esac
+
+# Get Moodle version from inside the container
+MOODLE_VERSION=$(docker exec "$CONTAINER_MOODLE" \
+  bash -c "sed -n \"s/.*\\\$release *= *'\([0-9.]*\).*/\1/p\" /var/www/html/version.php")
+
+# Generate timestamp and filename with suffix based on MODE
+TIMESTAMP=$(date "+%Y%m%d-%H%M")
+FILENAME="${MOODLE_VERSION}_${TIMESTAMP}_${SUFFIX}.tar.gz"
 
 if [[ "$MODE" == "interactive" ]]; then
   OPTIONS=(
@@ -85,32 +125,8 @@ EOF
   esac
 fi
 
-# Get Moodle version from inside the container
-MOODLE_VERSION=$(docker exec "$CONTAINER_MOODLE" \
-  bash -c "sed -n \"s/.*\\\$release *= *'\([0-9.]*\).*/\1/p\" /var/www/html/version.php")
-
-# Generate timestamp and filename with suffix based on MODE
-TIMESTAMP=$(date "+%Y%m%d-%H%M")
-
-case "$MODE" in
-  full)
-    SUFFIX="FULL"
-    ;;
-  moodle)
-    SUFFIX="MOODLE"
-    ;;
-  db)
-    SUFFIX="DUMP"
-    ;;
-  *)
-    SUFFIX="BACKUP"
-    ;;
-esac
-
-FILENAME="${MOODLE_VERSION}_${TIMESTAMP}_${SUFFIX}.tar.gz"
-
 # Stop Apache
-print_cmsg "\nStopping web server in container '$CONTAINER_MOODLE'..."
+print_cmsg "\nStopping web server in container '$CONTAINER_MOODLE'..." | tee -a "$LOG_FILE"
 docker exec "$CONTAINER_MOODLE" service apache2 stop
 echo
 
@@ -119,24 +135,24 @@ TMP_DIR=$(mktemp -d)
 
 # Backup DB
 if [[ "$MODE" == "db" || "$MODE" == "full" ]]; then
-  print_cmsg "Creating database dump from container '$CONTAINER_DB'..."
-  docker exec "$CONTAINER_DB" \
+  print_cmsg "Creating database dump from container '$CONTAINER_DB'..." | tee -a "$LOG_FILE"
+  docker exec "$CONTAINER_DB" \ 
     bash -c "mysqldump -u$MYSQL_ROOT_USER -p'$MYSQL_ROOT_PASSWORD' $MYSQL_DATABASE > /tmp/dump.sql"
   docker cp "$CONTAINER_DB":/tmp/dump.sql "$TMP_DIR/db.sql"
 fi
 
 # Backup Moodle web files
 if [[ "$MODE" == "moodle" || "$MODE" == "full" ]]; then
-  print_cmsg "Copying Moodle files from container '$CONTAINER_MOODLE'..."
+  print_cmsg "Copying Moodle files from container '$CONTAINER_MOODLE'..." | tee -a "$LOG_FILE"
   docker cp "$CONTAINER_MOODLE":/var/www/html "$TMP_DIR/moodle"
 fi
 
 # Restart Apache
-print_cmsg "Starting web server in container '$CONTAINER_MOODLE'..."
+print_cmsg "Starting web server in container '$CONTAINER_MOODLE'..." | tee -a "$LOG_FILE"
 docker exec "$CONTAINER_MOODLE" service apache2 start
 
 # Create archive properly without `./` as root folder
-print_cmsg "Creating archive..."
+print_cmsg "Creating archive..." | tee -a "$LOG_FILE"
 
 # Prepare list of files to archive
 FILES_TO_ARCHIVE=()
@@ -148,8 +164,11 @@ if [[ "$MODE" == "moodle" || "$MODE" == "full" ]]; then
 fi
 
 if tar -czf "$BACKUP_DIR/$FILENAME" -C "$TMP_DIR" "${FILES_TO_ARCHIVE[@]}"; then
-  print_cmsg "Backup complete: $BACKUP_DIR/$FILENAME"
+  print_cmsg "Backup complete: $BACKUP_DIR/$FILENAME" | tee -a "$LOG_FILE"
   rm -rf "$TMP_DIR"
 else
   echo "Error: Failed to create backup. Temporary files remain in $TMP_DIR for analysis."
 fi
+
+# Renaming log file
+mv "$LOG_FILE" "$LOG_DIR/$FILENAME.log"

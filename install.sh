@@ -41,7 +41,7 @@ fi
 
 # Creating install & log directory
 mkdir -p "$INSTALL_DIR/logs"
-LOG_FILE="$INSTALL_DIR/logs/install.log"
+LOG_FILE="$LOG_DIR/install.log"
 
 # Display title
 clear
@@ -57,7 +57,7 @@ $(printf '\033[0m')
 EOF
 
 # User Notice
-print_cmsg "If you encounter any issues, please check the GitHub repository: https://github.com/JoSi-git/m169"
+echo -e "\e[1;91mIf you encounter any issues, please check the GitHub repository: https://github.com/JoSi-git/m169\e[0m"
 
 # Ask if system updates should be performed
 print_cmsg -n "Do you want to perform system updates? (Y/n):"
@@ -88,8 +88,9 @@ mkdir -p "$INSTALL_DIR/tools/moodle-status"
 mkdir -p "$INSTALL_DIR/dumps"
 mkdir -p "$INSTALL_DIR/dumps/migration"
 mkdir -p "$INSTALL_DIR/logs/moodle"
-mkdir -p "$INSTALL_DIR/logs/apache"
-mkdir -p "$INSTALL_DIR/logs/mariadb"
+mkdir -p "$LOG_DIR/apache"
+mkdir -p "$LOG_DIR/mariadb"
+mkdir -p "$LOG_DIR/moodle-backup"
 
 # Copy Docker files
 print_cmsg "Copying files from $SCRIPT_DIR/docker to $INSTALL_DIR..." | tee -a "$LOG_FILE"
