@@ -5,8 +5,6 @@
 # Last Update: 2025-05-25
 # Description: Simple terminal status padge made with gum
 
-clear
-
 # Load environment variables from .env
 if [[ -f "./.env" ]]; then
   source "./.env"
@@ -15,6 +13,8 @@ else
   echo ".env file wasn't found in local directory. Exiting."
   exit 1
 fi
+
+clear
 
 # Config and color setup
 WIDTH=100
@@ -25,18 +25,33 @@ HEADER_COLOR=$BLUE
 OK_COLOR=$BLUE
 ERR_COLOR=$BLUE
 
-# Terminal width for centering
+ascii_logo="
+  __  __              _ _       ___          _             ___ _        _           
+ |  \/  |___  ___  __| | |___  |   \ ___  __| |_____ _ _  / __| |_ __ _| |_ _  _ ___
+ | |\/| / _ \/ _ \/ _\` | / -_) | |) / _ \/ _| / / -_) '_| \__ \  _/ _\` |  _| || (_-<
+ |_|  |_\___/\___/\__,_|_\___| |___/\___/\__|_\_\___|_|   |___/\__\__,_|\__|\_,_/__/
+"
+
+# Terminal width for centering title text
 terminal_width=$(tput cols)
 title_text="Welcome to the Moodle-Status Padge — all necessary services can be started and monitored with the following TUI"
 padding=$(( (terminal_width - ${#title_text}) / 2 ))
 centered_title=$(printf "%*s" $((padding + ${#title_text})) "$title_text")
 
-# Warning text for first box
-warning_text=$(gum style --foreground 196 --bold <<< "⚠ If you encounter any issues, please check the GitHub repository: https://github.com/JoSi-git/m169")
+# Warning text for the first box
+warning_text=$(gum style --foreground 196 --bold <<< "If you encounter any issues, please check the GitHub repository: https://github.com/JoSi-git/m169")
 
-# Title box with warning
+# Combine ASCII, title, description, warning into first box
+title_box_content="$ascii_logo
+
+$centered_title
+
+Simple terminal status padge made with gum
+
+$warning_text"
+
 title_box=$(gum style --border normal --padding "1 3" --width $WIDTH \
-  --foreground $BLUE --bold <<< "$centered_title"$'\n\n'"$warning_text")
+  --foreground $BLUE --bold <<< "$title_box_content")
 
 # Docker Compose status check (no spinner)
 if docker compose ls --format "{{.Service}}" &>/dev/null; then
@@ -88,12 +103,9 @@ choice=$(gum choose --header "What would you like to do?" \
   "[7] Exit")
 
 # Action handler
-
-
-# Action handler
 case "$choice" in
   "[1] Open Documentation")
-    firefox "https://github.com/JoSi-git/m169/blob/main/README.md" >/dev/null 2>&1 &
+    firefox "https://github.com/JoSi-git/m169"
     ;;
   "[2] Start Moodle")
     if gum confirm "Show logs?"; then
@@ -118,4 +130,3 @@ case "$choice" in
     gum style --foreground "$VALUE_COLOR" <<< "Goodbye!"
     ;;
 esac
-
