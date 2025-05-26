@@ -48,7 +48,11 @@ print_cmsg "Creating database dump from container '$CONTAINER_DB'..."
 
 # Dump the database
 docker exec "$CONTAINER_DB" \
-  bash -c "mysqldump -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE" > "$BACKUP_DIR/db.sql"
+  bash -c "mysqldump -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE > /tmp/dump.sql"
+
+# copy dump to dump directory
+sudo docker cp moodle-db:/tmp/dump.sql /opt/moodle-docker/dumps/dump.sql
+
 
 print_cmsg "Copying Moodle files from container '$CONTAINER_MOODLE'..."
 
