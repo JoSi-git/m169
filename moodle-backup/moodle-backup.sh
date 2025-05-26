@@ -1,100 +1,115 @@
 #!/bin/bash
 
-# Moodle Docker backup script
+# Moodle Docker backup script (Interactive & CLI-args)
 # Author: JoSi
 # Last Update: 2025-05-26
-# Description: Moodle backup tool with interactive selection
 
 clear
 
-# Show title using Gum
-gum style --border normal --margin "1" --padding "1 2" --border-foreground 33 "Moodle Docker Backup Tool"
-
-# Function: Print bold messages to console
-print_cmsg() {
-  if [[ "$1" == "-n" ]]; then
-    shift
-    echo -ne "\e[1m$*\e[0m"
-  else
-    echo -e "\e[1m$*\e[0m"
-  fi
-}
-
-# Load environment variables from local .env file
-if [[ -f "./.env" ]]; then
-    source "./.env"
-    print_cmsg ".env file found and loaded from local directory."
-else
-    print_cmsg ".env file wasn't found in local directory. Exiting."
-    exit 1
+# Title (only shown if interactive)
+if [ -t 1 ]; then
+  gum style --border double --margin "1" --padding "1 2" --border-foreground 33 "\U0001F4BE Moodle Docker Backup Tool"
 fi
 
-# Display selection menu using Gum
-CHOICE=$(gum choose "Exit" "Backup only database" "Backup only moodledata" "Backup both")
+# Function to print messages in bold
+print_cmsg() {
+  if [[ "$1" == "-n" ]]; then shift; echo -ne "\e[1m$*\e[0m"; else echo -e "\e[1m$*\e[0m"; fi
+}
 
-# Handle user choice
-case "$CHOICE" in
-  "Exit")
-    print_cmsg "Exiting..."
+# Load environment variables from .env
+if [[ -f "./.env" ]]; then
+  source "./.env"
+  print_cmsg ".env file found and loaded from local directory."
+else
+  print_cmsg ".env file wasn't found in local directory. Exiting."
+  exit 1
+fi
+
+# Default mode
+MODE="interactive"
+
+# Argument parsing
+case "$1" in
+  --db-only)
+    MODE="db"
+    ;;
+  --moodle-only)
+    MODE="moodle"
+    ;;
+  --full)
+    MODE="full"
+    ;;
+  --help)
+    echo "Usage: $0 [--full | --db-only | --moodle-only]"
     exit 0
     ;;
-  "Backup only database")
-    BACKUP_DB=true
-    BACKUP_MOODLE=false
-    ;;
-  "Backup only moodledata")
-    BACKUP_DB=false
-    BACKUP_MOODLE=true
-    ;;
-  "Backup both")
-    BACKUP_DB=true
-    BACKUP_MOODLE=true
+  "")
+    MODE="interactive"
     ;;
   *)
-    print_cmsg "Invalid choice. Exiting."
+    echo "Invalid argument: $1"
     exit 1
     ;;
+
 esac
 
-# Stop Apache inside Moodle container before backup
-print_cmsg "Stopping web server in container '$CONTAINER_MOODLE'..."
+# Interactive menu if no parameter was given
+if [[ "$MODE" == "interactive" ]]; then
+  MODE=$(gum choose --cursor ">" --header "What would you like to backup?" \
+    "Full backup (DB + moodledata)" \
+    "Only database" \
+    "Only moodledata" \
+    "Exit")
+
+  case "$MODE" in
+    "Full backup (DB + moodledata)") MODE="full";;
+    "Only database") MODE="db";;
+    "Only moodledata") MODE="moodle";;
+    "Exit") print_cmsg "Exiting..."; exit 0;;
+    *) print_cmsg "Invalid selection. Exiting."; exit 1;;
+  esac
+fi
+
+# Stop Apache
+print_cmsg "\nStopping web server in container '$CONTAINER_MOODLE'..."
 docker exec "$CONTAINER_MOODLE" service apache2 stop
 
 # Get Moodle version from inside container
 MOODLE_VERSION=$(docker exec "$CONTAINER_MOODLE" \
-  bash -c "sed -n \"s/.*\\\$release *= *'\([0-9.]*\).*/\1/p\" /var/www/html/version.php")
+  bash -c "sed -n \"s/.*\\\$release *= *'\([0-9.]*\).*/\\1/p\" /var/www/html/version.php")
 
-# Generate timestamp and backup filename
+# Timestamp and filename
 TIMESTAMP=$(date "+%Y%m%d-%H%M")
-FILENAME="${MOODLE_VERSION}_${TIMESTAMP}_FULL.tar.gz"
+BASENAME="${MOODLE_VERSION}_${TIMESTAMP}"
+FILENAME="${BASENAME}_FULL.tar.gz"
 
-# Prepare backup directories
-mkdir -p "$BACKUP_DIR"
-TMP_BACKUP_DIR=$(mktemp -d)
+# Paths
+TMP_DIR=$(mktemp -d)
 
-# Backup database if selected
-if [[ "$BACKUP_DB" == true ]]; then
-  print_cmsg "Creating database dump from container '$CONTAINER_DB'..."
-  docker exec "$CONTAINER_DB" bash -c "mysqldump -u$MYSQL_ROOT_USER -p'$MYSQL_ROOT_PASSWORD' $MYSQL_DATABASE > /tmp/dump.sql"
-  docker cp "$CONTAINER_DB":/tmp/dump.sql "$TMP_BACKUP_DIR/db.sql"
+# Backup DB
+if [[ "$MODE" == "db" || "$MODE" == "full" ]]; then
+  print_cmsg "\nCreating database dump from container '$CONTAINER_DB'..."
+  docker exec "$CONTAINER_DB" \
+    bash -c "mysqldump -u$MYSQL_ROOT_USER -p'$MYSQL_ROOT_PASSWORD' $MYSQL_DATABASE > /tmp/dump.sql"
+  docker cp "$CONTAINER_DB":/tmp/dump.sql "$TMP_DIR/db.sql"
 fi
 
-# Backup Moodle files if selected
-if [[ "$BACKUP_MOODLE" == true ]]; then
-  print_cmsg "Copying Moodle files from container '$CONTAINER_MOODLE'..."
-  docker cp "$CONTAINER_MOODLE":/var/www/html "$TMP_BACKUP_DIR/moodle"
+# Backup Moodle web files
+if [[ "$MODE" == "moodle" || "$MODE" == "full" ]]; then
+  print_cmsg "\nCopying Moodle files from container '$CONTAINER_MOODLE'..."
+  docker cp "$CONTAINER_MOODLE":/var/www/html "$TMP_DIR/moodle"
 fi
 
-# Create tar.gz archive from temporary backup directory
-print_cmsg "Creating archive..."
-tar -czf "$BACKUP_DIR/$FILENAME" -C "$TMP_BACKUP_DIR" .
+# Create archive
+print_cmsg "\nCreating archive..."
+tar -czf "$BACKUP_DIR/$FILENAME" -C "$TMP_DIR" .
 
-# Remove temporary files
-rm -rf "$TMP_BACKUP_DIR"
+# Cleanup
+rm -rf "$TMP_DIR"
 
-# Restart Apache inside Moodle container
-print_cmsg "Starting web server in container '$CONTAINER_MOODLE'..."
+# Restart Apache
+print_cmsg "\nStarting web server in container '$CONTAINER_MOODLE'..."
 docker exec "$CONTAINER_MOODLE" service apache2 start
 
-# Final confirmation
-print_cmsg "Backup complete: $BACKUP_DIR/$FILENAME"
+# Done
+print_cmsg "\nBackup complete: $BACKUP_DIR/$FILENAME"
