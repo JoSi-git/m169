@@ -3,7 +3,7 @@
 # Moodle Docker backup script (Interactive & CLI-args)
 # Author: JoSi
 # Last Update: 2025-05-26
-
+# Description: Simple terminal backup tool
 clear
 
 # Title (only shown if interactive)
@@ -73,29 +73,6 @@ if [[ "$MODE" != "interactive" ]]; then
   esac
 fi
 
-case "$MODE" in
-  full)
-    SUFFIX="FULL"
-    ;;
-  moodle)
-    SUFFIX="MOODLE"
-    ;;
-  db)
-    SUFFIX="DUMP"
-    ;;
-  *)
-    SUFFIX="BACKUP"
-    ;;
-esac
-
-# Get Moodle version from inside the container
-MOODLE_VERSION=$(docker exec "$CONTAINER_MOODLE" \
-  bash -c "sed -n \"s/.*\\\$release *= *'\([0-9.]*\).*/\1/p\" /var/www/html/version.php")
-
-# Generate timestamp and filename with suffix based on MODE
-TIMESTAMP=$(date "+%Y%m%d-%H%M")
-FILENAME="${MOODLE_VERSION}_${TIMESTAMP}_${SUFFIX}.tar.gz"
-
 if [[ "$MODE" == "interactive" ]]; then
   OPTIONS=(
     "Exit"
@@ -124,6 +101,29 @@ EOF
     *) echo "Invalid selection. Exiting."; exit 0 ;;
   esac
 fi
+
+case "$MODE" in
+  full)
+    SUFFIX="FULL"
+    ;;
+  moodle)
+    SUFFIX="MOODLE"
+    ;;
+  db)
+    SUFFIX="DUMP"
+    ;;
+  *)
+    SUFFIX="BACKUP"
+    ;;
+esac
+
+# Get Moodle version from inside the container
+MOODLE_VERSION=$(docker exec "$CONTAINER_MOODLE" \
+  bash -c "sed -n \"s/.*\\\$release *= *'\([0-9.]*\).*/\1/p\" /var/www/html/version.php")
+
+# Generate timestamp and filename with suffix based on MODE
+TIMESTAMP=$(date "+%Y%m%d-%H%M")
+FILENAME="${MOODLE_VERSION}_${TIMESTAMP}_${SUFFIX}.tar.gz"
 
 # Stop Apache
 print_cmsg "\nStopping web server in container '$CONTAINER_MOODLE'..." | tee -a "$LOG_FILE"

@@ -3,6 +3,7 @@
 # Moodle Docker Restore Script
 # Author: JoSi
 # Last Update: 2025-05-26
+# Description: Simple terminal restore tool
 
 # Title (only shown if interactive)
 printf '\033[38;5;33mMoodle Docker Restore Tool\n-------------------------------\n\033[0m'
