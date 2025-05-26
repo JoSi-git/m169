@@ -55,9 +55,11 @@ esac
 
 # Interactive menu if no parameter was given
 if [[ "$MODE" == "interactive" ]]; then
-MODE=$(gum choose --cursor ">" --limit 1 \
-    --header "$MENU_HEADER" \
-    --header-foreground 15 \
+  MODE=$(gum choose --cursor ">" \
+    --header "What would you like to backup?" \
+    --header.foreground 15 \
+    --prompt.foreground 33 \
+    --cursor.foreground 33 \
     "Full backup (DB + moodledata)" \
     "Only database" \
     "Only moodledata" \
