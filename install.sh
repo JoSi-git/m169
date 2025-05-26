@@ -187,19 +187,19 @@ docker image prune -a -f
 docker compose down
 
 # Add aliases to ~/.bashrc (if not already present)
-if ! grep -qE "^alias moodle-up=" "$SHELL_RC"; then
+if ! grep -q "moodle-up()" "$SHELL_RC"; then
     {
         echo ""
-        echo "# Moodle Docker aliases"
-        echo "alias moodle-up='(cd \"$INSTALL_DIR\" && docker compose up -d && docker compose ps && xdg-open http://localhost)'"
-        echo "alias moodle-down='(cd \"$INSTALL_DIR\" && docker compose down)'"
-        echo "alias moodle-backup='(sudo \"$INSTALL_DIR\"/tools/moodle-backup/moodle-backup.sh)'"
-        echo "alias moodle-restore='(sudo \"$INSTALL_DIR\"/tools/moodle-backup/moodle-restore.sh)'"
-        echo "alias moodle-status='(sudo \"$INSTALL_DIR\"/tools/moodle-status/moodle-status.sh)'"
+        echo "# Moodle Docker functions"
+        echo "moodle-up() { (cd \"$INSTALL_DIR\" && docker compose up -d && docker compose ps && xdg-open http://localhost); }"
+        echo "moodle-down() { (cd \"$INSTALL_DIR\" && docker compose down); }"
+        echo "moodle-backup() { sudo \"$INSTALL_DIR/tools/moodle-backup/moodle-backup.sh\" \"\$@\"; }"
+        echo "moodle-restore() { sudo \"$INSTALL_DIR/tools/moodle-backup/moodle-restore.sh\" \"\$@\"; }"
+        echo "moodle-status() { sudo \"$INSTALL_DIR/tools/moodle-status/moodle-status.sh\" \"\$@\"; }"
     } >> "$SHELL_RC"
-     print_cmsg "Aliases 'moodle-up', 'moodle-down', 'moodle-backup', and 'moodle-restore added to $SHELL_RC" | tee -a "$LOG_FILE"
+    print_cmsg "Functions 'moodle-up', 'moodle-down', 'moodle-backup', 'moodle-status' etc. added to $SHELL_RC" | tee -a "$LOG_FILE"
 else
-    print_cmsg "Aliases already exist in $SHELL_RC - skipping addition." | tee -a "$LOG_FILE"
+    print_cmsg "Functions already exist in $SHELL_RC - skipping addition." | tee -a "$LOG_FILE"
 fi
 
 # Note on activation

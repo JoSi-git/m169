@@ -4,8 +4,8 @@
 # Author: JoSi
 # Last Update: 2025-05-26
 
-# Show title
-gum style --border normal --margin "1" --padding "1 2" --border-foreground 33 "Moodle Docker Restore Tool"
+# Title (only shown if interactive)
+printf '\033[38;5;33mMoodle Docker Restore Tool\n-------------------------------\n\033[0m'
 
 # Function: Prints the given text in bold on the console
 print_cmsg() {
@@ -59,6 +59,7 @@ print_cmsg "Selected backup: $BACKUP_FILE"
 # Stop Apache in Moodle container
 print_cmsg "Stopping web server in container '$CONTAINER_MOODLE'..."
 docker exec "$CONTAINER_MOODLE" service apache2 stop
+echo
 
 # Create temporary restore directory
 TMP_DIR=$(mktemp -d)

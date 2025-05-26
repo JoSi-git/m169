@@ -58,30 +58,30 @@ esac
 
 if [[ "$MODE" == "interactive" ]]; then
   OPTIONS=(
+    "Exit"
     "Full backup (DB + moodledata)"
     "Only database"
     "Only moodledata"
-    "Exit"
   )
 
-  # Display menu with border and numbered list using gum
+
+# Display menu with border and numbered list using gum
   gum style --border normal --padding "1 2" --border-foreground 33 <<EOF
 What would you like to backup?
 
 $(printf '%s\n' "${OPTIONS[@]}" | nl -w1 -s'. ')
 EOF
-
   echo
   # Prompt user to enter their choice number
   read -p "Enter the number of your choice: " SELECTION
 
   # Map the numeric choice to the corresponding MODE value
   case "$SELECTION" in
-    1) MODE="full" ;;
-    2) MODE="db" ;;
-    3) MODE="moodle" ;;
-    4) echo "Exiting..."; exit 0 ;;
-    *) echo "Invalid selection. Exiting."; exit 1 ;;
+    1) echo "Exiting..."; exit 0 ;;
+    2) MODE="full" ;;
+    3) MODE="db" ;;
+    4) MODE="moodle" ;;
+    *) echo "Invalid selection. Exiting."; exit 0 ;;
   esac
 fi
 
