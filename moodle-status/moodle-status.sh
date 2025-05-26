@@ -10,9 +10,9 @@ clear
 # Load environment variables from .env
 if [[ -f "./.env" ]]; then
   source "./.env"
-  print_cmsg ".env file found and loaded from local directory."
+  echo ".env file found and loaded from local directory."
 else
-  print_cmsg ".env file wasn't found in local directory. Exiting."
+  echo ".env file wasn't found in local directory. Exiting."
   exit 1
 fi
 
@@ -96,7 +96,11 @@ case "$choice" in
     firefox "https://github.com/JoSi-git/m169/blob/main/README.md" >/dev/null 2>&1 &
     ;;
   "[2] Start Moodle")
-    gum confirm "Show logs?" && (cd "$INSTALL_DIR" && docker compose logs -f)
+    if gum confirm "Show logs?"; then
+        cd "$INSTALL_DIR" && docker compose up && docker compose logs -f
+    else
+        cd "$INSTALL_DIR" && docker compose up -d
+    fi
     ;;
   "[3] Stop Moodle")
     (cd "$INSTALL_DIR" && docker compose down)
