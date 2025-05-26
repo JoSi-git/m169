@@ -25,12 +25,13 @@ HEADER_COLOR=$BLUE
 OK_COLOR=$BLUE
 ERR_COLOR=$BLUE
 
-ascii_logo="
+ascii_logo=$(cat <<'EOF'
   __  __              _ _       ___          _             ___ _        _           
  |  \/  |___  ___  __| | |___  |   \ ___  __| |_____ _ _  / __| |_ __ _| |_ _  _ ___
- | |\/| / _ \/ _ \/ _\` | / -_) | |) / _ \/ _| / / -_) '_| \__ \  _/ _\` |  _| || (_-<
+ | |\/| / _ \/ _ \/ _` | / -_) | |) / _ \/ _| / / -_) '_| \__ \  _/ _` |  _| || (_-<
  |_|  |_\___/\___/\__,_|_\___| |___/\___/\__|_\_\___|_|   |___/\__\__,_|\__|\_,_/__/
-"
+EOF
+)
 
 # Terminal width for centering title text
 terminal_width=$(tput cols)
@@ -42,27 +43,24 @@ centered_title=$(printf "%*s" $((padding + ${#title_text})) "$title_text")
 warning_text=$(gum style --foreground 196 --bold <<< "If you encounter any issues, please check the GitHub repository: https://github.com/JoSi-git/m169")
 
 # Combine ASCII, title, description, warning into first box
-title_box_content="$ascii_logo
-
-$centered_title
-
-Simple terminal status padge made with gum
-
-$warning_text"
+echo -e "$ascii_logo\n"
+echo "$centered_title"
+echo "$warning_text"
 
 title_box=$(gum style --border normal --padding "1 3" --width $WIDTH \
   --foreground $BLUE --bold <<< "$title_box_content")
 
-# Docker Compose status check (no spinner)
-if docker compose ls --format "{{.Service}}" &>/dev/null; then
-  count=$(docker compose ls --format "{{.Service}}" | wc -l)
-  if [ "$count" -gt 0 ]; then
+# Docker Compose status check
+if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+  running_projects=$(docker compose ls | tail -n +2 | awk '{print $2}' | grep -c "running")
+  
+  if [ "$running_projects" -gt 0 ]; then
     compose_icon="✔"
-    compose_message="Docker Compose is running"
+    compose_message="Docker Compose projects running"
     compose_color=$OK_COLOR
   else
     compose_icon="✘"
-    compose_message="Docker Compose is stopped"
+    compose_message="No Docker Compose projects running"
     compose_color=$ERR_COLOR
   fi
 else
@@ -70,6 +68,8 @@ else
   compose_message="Docker Compose command not available"
   compose_color=$ERR_COLOR
 fi
+
+echo "$compose_icon $compose_message"
 
 compose_status_box=$(gum style --border rounded --padding "1 3" --width $WIDTH \
   --border-foreground $compose_color <<< "$compose_icon   $compose_message")
@@ -105,7 +105,11 @@ choice=$(gum choose --header "What would you like to do?" \
 # Action handler
 case "$choice" in
   "[1] Open Documentation")
-    firefox "https://github.com/JoSi-git/m169"
+    if command -v firefox &>/dev/null; then
+      firefox "https://github.com/JoSi-git/m169" &
+    else
+      echo "Firefox not found."
+    fi
     ;;
   "[2] Start Moodle")
     if gum confirm "Show logs?"; then
