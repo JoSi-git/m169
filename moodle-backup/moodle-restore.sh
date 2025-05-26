@@ -95,3 +95,6 @@ docker exec "$CONTAINER_MOODLE" service apache2 start
 
 # Done
 print_cmsg "Restore complete."
+
+# User Notice
+echo -e "\e[1;91mPlease restarte Docker Compose\e[0m"
