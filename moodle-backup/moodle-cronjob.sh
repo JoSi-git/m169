@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Moodle Backup Scheduler with Gum UI
+# Moodle Backup Scheduler with Gum
 # Author: JoSi (style matched)
 # Last Update: 2025-05-27
 # Description: Interactive schedule manager using gum to configure backup cronjobs.
