@@ -5,9 +5,6 @@
 # Last Update: 2025-05-26
 # Description: Simple terminal backup tool
 
-# Title (only shown if interactive)
-printf '\033[38;5;33mMoodle Docker Backup Tool\n-------------------------------\n\033[0m'
-
 # Function: Prints the given text in bold on the console
 print_cmsg() {
   if [[ "$1" == "-n" ]]; then
@@ -31,6 +28,8 @@ fi
 MODE="interactive"
 LOG_FILE="$LOG_DIR/moodle-backup/running-backup.log"
 
+# Title (only shown if interactive)
+printf '\033[38;5;33mMoodle Docker Backup Tool\n-------------------------------\n\033[0m'
 
 # Argument parsing
 case "$1" in

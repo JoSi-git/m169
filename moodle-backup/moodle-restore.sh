@@ -5,9 +5,6 @@
 # Last Update: 2025-05-26
 # Description: Simple terminal restore tool
 
-# Title (only shown if interactive)
-printf '\033[38;5;33mMoodle Docker Restore Tool\n-------------------------------\n\033[0m'
-
 # Function: Prints the given text in bold on the console
 print_cmsg() {
   if [[ "$1" == "-n" ]]; then
@@ -26,6 +23,9 @@ else
   print_cmsg ".env file wasn't found in local directory. Exiting."
   exit 1
 fi
+
+# Title (only shown if interactive)
+printf '\033[38;5;33mMoodle Docker Restore Tool\n-------------------------------\n\033[0m'
 
 # Get list of available backup files (limit to 20 most recent)
 BACKUPS=($(ls -1t "$BACKUP_DIR"/*.tar.gz | head -n 20))
