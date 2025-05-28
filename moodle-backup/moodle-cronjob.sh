@@ -92,7 +92,7 @@ add_schedule() {
 
   local time
   while true; do
-    time=$(gum input --prompt="Enter backup time (HH:MM 24h format):")
+    time=$(gum input --prompt="Enter backup time (HH:MM 24h format):" --placeholder="")
     if [[ "$time" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
       break
     else
@@ -205,7 +205,7 @@ Choose an action:
 5) Exit
 EOF
 
-  choice=$(gum input --prompt="Enter your choice [1-5]:")
+  choice=$(gum input --prompt="Enter your choice [1-5]:" --placeholder="")
 
   case "$choice" in
     1)
