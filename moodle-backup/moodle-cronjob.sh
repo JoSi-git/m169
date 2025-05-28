@@ -84,30 +84,30 @@ show_schedule() {
 add_schedule() {
   local modes=("full" "db-only" "moodle-only")
   local mode=$(gum choose "${modes[@]}")
-  [[ -z "$mode" ]] && print_cmsg "No mode selected." && return
 
   local all_days=(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)
-  local days
-  days=$(gum choose --no-limit "${all_days[@]}")
-  [[ -z "$days" ]] && print_cmsg "No days selected." && return
+
+  # Einfach nur einen Tag auswählen
+  echo "Wähle einen Tag:"
+  local selected_day=$(gum choose "${all_days[@]}")
+
+  # days als JSON-Array mit einem Tag
+  local json_days=$(jq -n --arg day "$selected_day" '[$day]')
 
   local time
   while true; do
-    time=$(gum input --prompt="Enter backup time (HH:MM 24h format):")
+    time=$(gum input --prompt="Enter backup time (HH:MM 24h format):" --placeholder="")
     if [[ "$time" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
       break
     else
-      gum style --foreground=red --bold "Invalid time format. Use 24-hour format like 09:00 or 18:45."
+      gum style --foreground=red --bold "Invalid time format. Please enter time in 24-hour format like 09:00 or 18:45."
     fi
   done
-
-  local json_days
-  json_days=$(printf '%s\n' $days | jq -R . | jq -s .)
 
   jq --arg mode "$mode" --argjson days "$json_days" --arg time "$time" \
     '. += [{"mode": $mode, "days": $days, "time": $time}]' "$SCHEDULE_FILE" > "${SCHEDULE_FILE}.tmp" && mv "${SCHEDULE_FILE}.tmp" "$SCHEDULE_FILE"
 
-  print_cmsg "New schedule added: Mode=$mode, Days=$days, Time=$time"
+  print_cmsg "New schedule added: Mode=$mode, Day=$selected_day, Time=$time"
 }
 
 remove_schedule() {
