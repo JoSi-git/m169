@@ -80,7 +80,7 @@ echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *
 sudo apt update && sudo apt install gum
 
 # Installing jq
-sudo apt install jq
+sudo apt install
 
 # Creating required directories in $INSTALL_DIR
 print_cmsg "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
@@ -226,11 +226,12 @@ gum style --border normal --margin "1" --padding "1 2" --border-foreground 33 <<
    docker compose down                                     /"""""""""""""""""""\____/ ===
                                                  ~ ~~~ ~~ {                          /~ === ~~ ~~~
  => You can also use aliases for convenience:              \                        /      -
-   moodleup     -> Starts & opens Moodle                    \_______ O           __/
-   moodledown   -> Stops containers                                 \___________/
-
- => Start backup:                                          DJS Moodle Docker Install Script
-   moodlebackup                                                      	$VER
+   moodle-up     -> Starts & opens Moodle                   \_______ O           __/
+   moodle-down   -> Stops containers                                \___________/
+   moodle-status -> Moodle status padge
+                                                          DJS Moodle Docker Install Script
+ => Start backup:                                                      $VER
+   moodlebackup                                                      	
    Guide: https://github.com/JoSi-git/m169/readme.md
 
  => Legacy system: http://localhost:8080

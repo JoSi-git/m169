@@ -154,13 +154,21 @@ install_cronjobs() {
 
   for item in "${schedule[@]}"; do
     mode=$(echo "$item" | jq -r '.mode')
-    days_arr=($(echo "$item" | jq -r '.days[]'))
+    readarray -t days_arr < <(echo "$item" | jq -r '.days[]')
     time=$(echo "$item" | jq -r '.time')
 
-    [[ -z "$mode" || -z "$days_arr" || -z "$time" ]] && continue
+    # Validierung
+    if [[ -z "$mode" || ${#days_arr[@]} -eq 0 || -z "$time" ]]; then
+      print_cmsg "Skipping invalid schedule entry: $item"
+      continue
+    fi
 
     cron_wdays=$(days_to_cron_wday "${days_arr[@]}")
-    IFS=':' read -r hour minute <<< "$time"
+    if ! IFS=':' read -r hour minute <<< "$time"; then
+      print_cmsg "Invalid time format in: $time"
+      continue
+    fi
+
     cron_line="$minute $hour * * $cron_wdays $BACKUP_CMD $mode $CRON_COMMENT"
 
     if cronjob_exists "$cron_line"; then
@@ -171,8 +179,13 @@ install_cronjobs() {
     fi
   done
 
-  crontab "$CRON_TMP" && print_cmsg "\nCron jobs installed successfully."
-  rm "$CRON_TMP"
+  if crontab "$CRON_TMP"; then
+    print_cmsg "\nCron jobs installed successfully."
+  else
+    print_cmsg "\nFailed to install cron jobs!"
+  fi
+
+  rm -f "$CRON_TMP"
 }
 
 # Main menu loop

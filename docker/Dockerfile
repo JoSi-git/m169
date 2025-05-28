@@ -2,6 +2,7 @@ FROM moodlehq/moodle-php-apache:8.2
 
 # Maintainer information
 LABEL maintainer="Jonas Sieber (JoSi-git) <jonas.sieber@edu.gbssg.ch>"
+LABEL version="1.0."
 
 # Update system package list and install required tools
 RUN apt-get update && \
