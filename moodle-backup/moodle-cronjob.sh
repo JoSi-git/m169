@@ -5,7 +5,6 @@
 # Last Update: 2025-05-28
 # Description: Interactive schedule manager using gum to configure backup cronjobs.
 
-# Function: Prints the given text in bold on the console
 print_cmsg() {
   if [[ "$1" == "-n" ]]; then
     shift
@@ -15,7 +14,7 @@ print_cmsg() {
   fi
 }
 
-# Load environment variables from .env
+# Load .env
 if [[ -f "./.env" ]]; then
   source "./.env"
   print_cmsg ".env file found and loaded from local directory."
@@ -31,13 +30,8 @@ CRON_TMP=$(mktemp)
 
 # Map weekday names to cron weekday numbers
 declare -A DAY_TO_CRON=(
-  [Sunday]=0
-  [Monday]=1
-  [Tuesday]=2
-  [Wednesday]=3
-  [Thursday]=4
-  [Friday]=5
-  [Saturday]=6
+  [Sunday]=0 [Monday]=1 [Tuesday]=2 [Wednesday]=3
+  [Thursday]=4 [Friday]=5 [Saturday]=6
 )
 
 days_to_cron_wday() {
@@ -49,13 +43,19 @@ days_to_cron_wday() {
   IFS=','; echo "${cron_days[*]}"
 }
 
-# Ensure schedule file exists
-if [[ ! -f "$SCHEDULE_FILE" ]]; then
-  echo "[]" > "$SCHEDULE_FILE"
-fi
+# Ensure schedule file exists and remove invalid entries
+sanitize_schedule_file() {
+  if [[ ! -f "$SCHEDULE_FILE" ]]; then
+    echo "[]" > "$SCHEDULE_FILE"
+  fi
+
+  # Remove entries with missing mode, days, or time
+  jq '[.[] | select(.mode != "" and (.days | length > 0) and .time != "")]' "$SCHEDULE_FILE" > "${SCHEDULE_FILE}.tmp" && mv "${SCHEDULE_FILE}.tmp" "$SCHEDULE_FILE"
+}
 
 # Load schedule JSON into bash array
 load_schedule() {
+  sanitize_schedule_file
   mapfile -t schedule < <(jq -c '.[]' "$SCHEDULE_FILE")
 }
 
@@ -67,7 +67,7 @@ show_schedule() {
   fi
 
   printf '\033[38;5;33mCurrent backup schedules:\n-------------------------------\n\033[0m'
-
+  echo
   printf "%-3s | %-10s | %-20s | %-5s\n" "No" "Mode" "Days" "Time"
   echo "--------------------------------------------"
   local i=1
@@ -81,25 +81,25 @@ show_schedule() {
   echo
 }
 
-# Add new schedule entry
 add_schedule() {
   local modes=("full" "db-only" "moodle-only")
   local mode=$(gum choose "${modes[@]}")
+  [[ -z "$mode" ]] && print_cmsg "No mode selected." && return
 
   local all_days=(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)
   local days
   days=$(gum choose --no-limit "${all_days[@]}")
+  [[ -z "$days" ]] && print_cmsg "No days selected." && return
 
   local time
   while true; do
-    time=$(gum input --prompt="Enter backup time (HH:MM 24h format):" --placeholder="")
+    time=$(gum input --prompt="Enter backup time (HH:MM 24h format):")
     if [[ "$time" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
       break
     else
-      gum style --foreground=red --bold "Invalid time format. Please enter time in 24-hour format like 09:00 or 18:45."
+      gum style --foreground=red --bold "Invalid time format. Use 24-hour format like 09:00 or 18:45."
     fi
   done
-
 
   local json_days
   json_days=$(printf '%s\n' $days | jq -R . | jq -s .)
@@ -110,7 +110,6 @@ add_schedule() {
   print_cmsg "New schedule added: Mode=$mode, Days=$days, Time=$time"
 }
 
-# Remove schedule entry by number
 remove_schedule() {
   local count=${#schedule[@]}
   if (( count == 0 )); then
@@ -128,12 +127,8 @@ remove_schedule() {
     ((i++))
   done
 
-  local choice
-  choice=$(gum choose "${options[@]}")
-  if [[ -z "$choice" ]]; then
-    print_cmsg "No selection made."
-    return
-  fi
+  local choice=$(gum choose "${options[@]}")
+  [[ -z "$choice" ]] && print_cmsg "No selection made." && return
 
   local num=${choice%%)*}
   num=$((num))
@@ -142,18 +137,13 @@ remove_schedule() {
   print_cmsg "Removed schedule entry #$num."
 }
 
-# Install cron jobs from schedule
 install_cronjobs() {
   load_schedule
   print_cmsg "Installing cron jobs from schedule...\n"
 
-  # Create a temp file with current crontab except Moodle backup scheduler jobs
   crontab -l 2>/dev/null | grep -v "$CRON_COMMENT" > "$CRON_TMP" || true
-
-  # Read current crontab lines into an array
   mapfile -t current_cron < "$CRON_TMP"
 
-  # Function to check if a cron job already exists
   cronjob_exists() {
     local job="$1"
     for line in "${current_cron[@]}"; do
@@ -162,15 +152,15 @@ install_cronjobs() {
     return 1
   }
 
-  # Add cron jobs from JSON schedule if not already present
   for item in "${schedule[@]}"; do
     mode=$(echo "$item" | jq -r '.mode')
     days_arr=($(echo "$item" | jq -r '.days[]'))
     time=$(echo "$item" | jq -r '.time')
 
+    [[ -z "$mode" || -z "$days_arr" || -z "$time" ]] && continue
+
     cron_wdays=$(days_to_cron_wday "${days_arr[@]}")
     IFS=':' read -r hour minute <<< "$time"
-
     cron_line="$minute $hour * * $cron_wdays $BACKUP_CMD $mode $CRON_COMMENT"
 
     if cronjob_exists "$cron_line"; then
@@ -181,9 +171,7 @@ install_cronjobs() {
     fi
   done
 
-  # Install the new crontab
   crontab "$CRON_TMP" && print_cmsg "\nCron jobs installed successfully."
-
   rm "$CRON_TMP"
 }
 
@@ -192,9 +180,7 @@ while true; do
   load_schedule
   clear
 
-  # Title
   printf '\033[38;5;33mMoodle Backup Scheduler\n-------------------------------\n\033[0m'
-
   gum style --border normal --padding "1 2" --border-foreground 33 <<EOF
 Choose an action:
 
@@ -205,7 +191,7 @@ Choose an action:
 5) Exit
 EOF
 
-  choice=$(gum input --prompt="Enter your choice [1-5]:" --placeholder="")
+  choice=$(gum input --prompt="Enter your choice [1-5]:")
 
   case "$choice" in
     1)

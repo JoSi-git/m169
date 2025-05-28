@@ -73,10 +73,10 @@ fi
 
 if [[ "$MODE" == "interactive" ]]; then
   OPTIONS=(
-    "Exit"
     "Full backup (DB + moodledata)"
     "Only database"
     "Only moodledata"
+    "Exit"
   )
 
 
@@ -92,10 +92,10 @@ EOF
 
   # Map the numeric choice to the corresponding MODE value
   case "$SELECTION" in
-    1) echo "Exiting..."; exit 0 ;;
-    2) MODE="full" ;;
-    3) MODE="db" ;;
-    4) MODE="moodle" ;;
+    1) MODE="full" ;;
+    2) MODE="db" ;;
+    3) MODE="moodle" ;;
+    4) echo "Exiting..."; exit 0 ;;
     *) echo "Invalid selection. Exiting."; exit 0 ;;
   esac
 fi
