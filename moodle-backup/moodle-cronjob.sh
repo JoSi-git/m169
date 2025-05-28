@@ -204,9 +204,9 @@ Choose an action:
 5) Exit
 EOF
 
-  choice=$(gum input --prompt="Enter your choice [1-5]:")
+  choice=$(gum input --prompt="Enter your choice [1-5]:" --placeholder " ")
 
-  case "$choice" in
+  case "$choice"
     1)
       clear
       load_schedule
