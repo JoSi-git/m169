@@ -66,8 +66,7 @@ show_schedule() {
     return
   fi
 
-  echo "Current backup schedules:"
-  echo "-------------------------"
+  printf '\033[38;5;33mCurrent backup schedules:\n-------------------------------\n\033[0m'
 
   printf "%-3s | %-10s | %-20s | %-5s\n" "No" "Mode" "Days" "Time"
   echo "--------------------------------------------"
@@ -148,8 +147,22 @@ install_cronjobs() {
   load_schedule
   print_cmsg "Installing cron jobs from schedule...\n"
 
-  crontab -l 2>/dev/null | grep -v "$CRON_COMMENT" > "$CRON_TMP"
+  # Create a temp file with current crontab except Moodle backup scheduler jobs
+  crontab -l 2>/dev/null | grep -v "$CRON_COMMENT" > "$CRON_TMP" || true
 
+  # Read current crontab lines into an array
+  mapfile -t current_cron < "$CRON_TMP"
+
+  # Function to check if a cron job already exists
+  cronjob_exists() {
+    local job="$1"
+    for line in "${current_cron[@]}"; do
+      [[ "$line" == "$job" ]] && return 0
+    done
+    return 1
+  }
+
+  # Add cron jobs from JSON schedule if not already present
   for item in "${schedule[@]}"; do
     mode=$(echo "$item" | jq -r '.mode')
     days_arr=($(echo "$item" | jq -r '.days[]'))
@@ -160,10 +173,15 @@ install_cronjobs() {
 
     cron_line="$minute $hour * * $cron_wdays $BACKUP_CMD $mode $CRON_COMMENT"
 
-    echo "$cron_line" >> "$CRON_TMP"
-    print_cmsg "Added cron job: $cron_line"
+    if cronjob_exists "$cron_line"; then
+      print_cmsg "Cron job already exists, skipping: $cron_line"
+    else
+      echo "$cron_line" >> "$CRON_TMP"
+      print_cmsg "Added cron job: $cron_line"
+    fi
   done
 
+  # Install the new crontab
   crontab "$CRON_TMP" && print_cmsg "\nCron jobs installed successfully."
 
   rm "$CRON_TMP"
