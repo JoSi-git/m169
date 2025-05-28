@@ -29,9 +29,6 @@ CRON_COMMENT="# Moodle Docker Backup Scheduler"
 BACKUP_CMD="./moodle-backup.sh"
 CRON_TMP=$(mktemp)
 
-# Title
-printf '\033[38;5;33mMoodle Backup Scheduler\n-------------------------------\n\033[0m'
-
 # Map weekday names to cron weekday numbers
 declare -A DAY_TO_CRON=(
   [Sunday]=0
@@ -175,7 +172,9 @@ install_cronjobs() {
 while true; do
   load_schedule
   clear
-  print_title "Moodle Backup Scheduler\n----------------------\n"
+
+  # Title
+  printf '\033[38;5;33mMoodle Backup Scheduler\n-------------------------------\n\033[0m'
 
   gum style --border normal --padding "1 2" --border-foreground 33 <<EOF
 Choose an action:
@@ -217,4 +216,3 @@ EOF
       sleep 1
       ;;
   esac
-Done
