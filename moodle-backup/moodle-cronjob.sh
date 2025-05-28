@@ -68,6 +68,7 @@ show_schedule() {
 
   echo "Current backup schedules:"
   echo "-------------------------"
+
   printf "%-3s | %-10s | %-20s | %-5s\n" "No" "Mode" "Days" "Time"
   echo "--------------------------------------------"
   local i=1
@@ -83,9 +84,8 @@ show_schedule() {
 
 # Add new schedule entry
 add_schedule() {
-  local modes=("--full" "--db-only" "--moodle-only")
-  local mode
-  mode=$(gum choose "${modes[@]}")
+  local modes=("full" "db-only" "moodle-only")
+  local mode=$(gum choose "${modes[@]}")
 
   local all_days=(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)
   local days
@@ -97,9 +97,10 @@ add_schedule() {
     if [[ "$time" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
       break
     else
-      gum style --foreground=red --bold "Invalid time format. Please enter HH:MM (24h)."
+      gum style --foreground=red --bold "Invalid time format. Please enter time in 24-hour format like 09:00 or 18:45."
     fi
   done
+
 
   local json_days
   json_days=$(printf '%s\n' $days | jq -R . | jq -s .)
