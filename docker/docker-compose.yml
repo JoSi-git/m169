@@ -12,9 +12,6 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - moodle-net
-    dns:
-      - 1.1.1.1
-      - 8.8.8.8
 
   moodle:
     image: moodle-custom:latest
@@ -26,9 +23,6 @@ services:
       - db
     networks:
       - moodle-net
-    dns:
-      - 1.1.1.1
-      - 8.8.8.8
 
 networks:
   moodle-net:

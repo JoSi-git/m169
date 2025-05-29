@@ -42,13 +42,46 @@ chmod +x install.sh
 
 ### Skript ausführen
 
-Anschließend kann das Installationsskript gestartet werden:
+Anschliessend kann das Installationsskript gestartet werden:
 
 ```bash
 ./install.sh
 ```
 
-## ⚙️ 3 Konfiguration (.env)
+## 📁 3 Repository Struktur
+
+```bash
+├── docker
+│   ├── config.php
+│   ├── docker-compose.yml
+│   ├── Dockerfile
+│   └── php.ini
+├── img
+│   └── m169-title.png
+├── install.sh
+├── LICENSE
+├── moodle-backup
+│   ├── moodle-backup-schedule.json
+│   ├── moodle-backup.sh
+│   ├── moodle-cronjob.sh
+│   └── moodle-restore.sh
+├── moodle-migration
+│   ├── config.php
+│   ├── docker-compose.yml
+│   ├── Dockerfile
+│   └── php.ini
+├── moodle-status
+│   └── moodle-status.sh
+└── README.md
+```
+
+Im Verlauf der Ausführung des `install.sh`-Skripts werden sämtliche Ordner in ein projektspezifisches Verzeichnis kopiert (standardmässig nach `/opt/moodle/docker`). Anschliessend wird diese Struktur um zusätzliche Verzeichnisse und ergänzt, die nicht im Git-Repository enthalten sind. Nach erfolgreichem Abschluss des Skripts ergibt 
+sich im Zielverzeichnis die vollständige Projektstruktur:
+
+```bash
+
+```
+## ⚙️ 4 Konfiguration (.env)
 
 Alle anpassbaren Variablen wie **Installationspfade**, **Datenbank-Zugangsdaten** und **PHP-Einstellungen** befinden sich zentral in der Datei `.env`.  
 Diese Datei ermöglicht eine flexible Anpassung ohne direkte Änderungen am Skript.
@@ -57,20 +90,19 @@ Diese Datei ermöglicht eine flexible Anpassung ohne direkte Änderungen am Skri
 
 ```env
 INSTALL_DIR=/opt/moodle-docker
+LOG_DIR=/opt/moodle-docker/logs
 BACKUP_DIR=/opt/moodle-docker/dumps
-RESTORE_DIR=opt/tools/moodle-restore
+RESTORE_DIR=/opt/tools/moodle-restore
 
-MYSQL_ROOT_PASSWORD="Riethuesli>12345"
-MYSQL_ROOT_PASSWORD_OLD="Riethuesli>12345"
+MYSQL_ROOT_PASSWORD='Riethuesli>12345'
+MYSQL_ROOT_PASSWORD_OLD='Riethuesli>12345'
 MYSQL_DATABASE=moodle
+MYSQL_ROOT_USER=root
 MYSQL_USER=vmadmin
 MYSQL_PASSWORD="Riethuesli>12345"
-
 CONTAINER_MOODLE="moodle-web"
 CONTAINER_DB="moodle-db"
 
-PHP_INI-upload_max_filesize=200M
-PHP_INI-post_max_size=210M
 MOODLE_LOGSTORE=file
 MOODLE_FILELOG_LOCATION=/var/moodledata/logs/moodle.log
 ```
@@ -78,30 +110,102 @@ MOODLE_FILELOG_LOCATION=/var/moodledata/logs/moodle.log
 > ⚠️ **Wichtig:**  
 > Die Datei `.env` enthält sensible Informationen und sollte **niemals öffentlich geteilt** werden. Sie sollte weiterhin in `.gitignore` eingetragen sein.
 
-## 🔐 4 Zugangsdaten der Moodle-Weboberfläche
+## 🔐 5 Zugangsdaten der Moodle-Weboberfläche
 
 Die Benutzer und Passwörter für die Moodle-Instanz selbst (nicht die Datenbank) befinden sich **nicht** in der `.env`, sondern müssen direkt in den jeweiligen `config.php`-Dateien der Moodle-Installation geändert werden.
 
-Typische Pfade:
-
 ```bash
-/opt/moodle-docker/moodle/config.php
-/opt/moodle-docker/moodledata/config.php (falls vorhanden)
+# default path
+/opt/moodle-docker/config.php
+/opt/moodle-docker/tools/moodle-migration/config.php
 ```
 
-## 🏗️ 4 Backup und Restore
+## 🔧 6 Moodle-Status
+
+Die gesamten Zusatztools, darunter eine Übersicht, Backup, Restore und der Crontab-Manager, können mit folgendem Befehl abgerufen werden. Innerhalb dieses Befehls steht ein Untermenü zur Verfügung, in dem zwischen weiteren Funktionen ausgewählt werden kann.
+#### Alias für das interaktive Menü:
+
+```bash
+moodle-status
+```
+
+## 🏗️ 7 Backup und Restore
 
 > ⚠️ **Wichtig:**  
 > Die Moodle Instanz muss während dem Backup und dem Restore Prozess gestartet sein.
 
 ### Backup durchführen
 
+Es besteht ein integriertes Backup-Tool, das sowohl über ein TUI (Text User Interface) als auch per Parametersteuerung genutzt werden kann. Innerhalb des Tools gibt es die Möglichkeit, ein Backup der Datenbank, des Moodle-Datenverzeichnisses (moodledata) oder beides durchzuführen.
+
+Alle relevanten Daten und die Hauptstruktur liegen in der Datenbank. Bilder, Logs und sonstige Zusatzdateien befinden sich im Moodle-Datenverzeichnis (`moodledata`). Dieses Verzeichnis ist deshalb deutlich grösser.
+
+Die Backup-Funktion wurde so gestaltet, dass Backups mit einem kleinen Footprint im Halbtagesschichtzyklus möglich sind. Bilder und weitere grosse Dateien können dann in einem kleineren Zyklus separat gesichert werden.
+#### Alias für das interaktive Menü:
+
 ```bash
 moodle-backup
 ```
 
+#### Parameter für die Automatisierung
+
+- `moodle-backup --full`  
+    Führt ein komplettes Backup (Datenbank + Moodledata) durch.
+    
+- `moodle-backup --db-only`  
+    Sichert nur die Datenbank.
+    
+- `moodle-backup --moodle-only`  
+    Sichert nur das Moodle-Datenverzeichnis.
+
 ### Restore durchführen
+
+Für den Restore steht nur ein interaktives Menü zur Verfügung. Dieses listet alle vorhandenen Backups auf und bietet die Möglichkeit, eines davon auszuwählen. Das gewählte Backup wird danach automatisch wiederhergestellt.
+
+>⚠️ **Wichtig:**  
+ Nach dem Restore ist ein Neustart der Container notwendig.
+
+#### Alias für das interaktive Menü:
 
 ```bash
 moodle-restore
 ```
+
+### Cronjobs erstellen
+
+Backups können ausserdem mithilfe des Linux-Tools `cron` automatisiert werden. Dafür steht ebenfalls ein interaktives Menü zur Verfügung, mit dem der Typ (z. B. täglich) sowie die Uhrzeit konfiguriert werden können. Dieses Tool erleichtert die Einrichtung der automatischen Backups.
+#### Alias für das interaktive Menü:
+
+```bash
+moodle-cronjob
+```
+
+##  📜 8 Funktion und Aufgaben des Scripts
+
+-
+
+## ❓ FAQ – Häufige Probleme und Lösungen
+
+#### Probleme mit dem Speicherplatz der VM  
+Der Speicherplatz der VM ist oft knapp bemessen. Um mehr Platz zu schaffen, solltest du zunächst in den VM-Einstellungen unter **Harddisk** die Festplatte von z.B. 25 GB auf 35 GB erweitern.  
+Anschliessend kannst du nach dem Neustart von Ubuntu mit der vorinstallierten GNOME-App **Disks** den zusätzlichen Speicherplatz innerhalb der VM vergrössern.
+
+#### Netzwerkprobleme der VM  
+Die Netzwerkkonfiguration bei VMs kann etwas kompliziert sein, insbesondere bei mehreren Netzwerkadaptern.  
+Es wird grundsätzlich empfohlen, als Netzwerktyp **NAT** oder **Bridged** auszuwählen. Innerhalb der VM sollte die Netzwerkkonfiguration auf **DHCP** gesetzt sein (wichtig auch für die DNS-Auflösung).  
+Falls die VM keine IP-Adresse erhält, hilft meist ein erneutes Anfordern der IP mit dem Befehl:
+
+```bash
+sudo dhclient -r
+````
+
+#### Probleme mit der DNS-Auflösung im Docker-Container
+
+Manchmal können Host- oder DHCP-Konfigurationen dazu führen, dass Docker-Container keine DNS-Auflösung durchführen können.  
+Diese Probleme hängen häufig mit der VM-Netzwerk- und DNS-Einstellung zusammen. Es empfiehlt sich, die Netzwerk- und DNS-Konfiguration der VM gründlich zu prüfen und gegebenenfalls anzupassen.
+
+####  Upgrade-Prozess kann nicht durchgeführt werden
+
+Ubuntu blockiert den Upgrade-Prozess oft, weil im Hintergrund ein anderer Prozess läuft, der dieselben Ressourcen nutzt.  
+In den meisten Fällen wird das Problem durch einfaches Abwarten gelöst.  
+Falls das nicht hilft, kann ein Neustart der VM das Problem beheben. Danach sollte das Upgrade-Script erneut ausgeführt werden.
