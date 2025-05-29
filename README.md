@@ -79,7 +79,36 @@ Im Verlauf der Ausführung des `install.sh`-Skripts werden sämtliche Ordner in 
 sich im Zielverzeichnis die vollständige Projektstruktur:
 
 ```bash
-
+├── config.php
+├── docker-compose.yml
+├── Dockerfile
+├── dumps
+│   ├── 5.0_20250529-1634_FULL.tar.gz
+│   └── migration
+│       ├── 3.10.11-2025.05.29-15.52.sql
+│       └── 3.10.11-2025.05.29-17.18.sql
+├── logs
+│   ├── apache
+│   ├── install.log
+│   ├── mariadb
+│   ├── moodle
+│   └── moodle-backup
+│       └── 5.0_20250529-1634_FULL.tar.gz.log
+├── moodle-backup-schedule.json
+├── php.ini
+└── tools
+    ├── moodle-backup
+    │   ├── moodle-backup-schedule.json
+    │   ├── moodle-backup.sh
+    │   ├── moodle-cronjob.sh
+    │   └── moodle-restore.sh
+    ├── moodle-migration
+    │   ├── config.php
+    │   ├── docker-compose.yml
+    │   ├── Dockerfile
+    │   └── php.ini
+    └── moodle-status
+        └── moodle-status.sh
 ```
 ## ⚙️ 4 Konfiguration (.env)
 
