@@ -47,6 +47,9 @@ Anschliessend kann das Installationsskript gestartet werden:
 ```bash
 ./install.sh
 ```
+<div align="center">
+  <img src="https://github.com/JoSi-git/m169/blob/main/img/demo-moodle-install.png" />
+</div>
 
 ## 📁 3 Repository Struktur
 
@@ -57,6 +60,11 @@ Anschliessend kann das Installationsskript gestartet werden:
 │   ├── Dockerfile
 │   └── php.ini
 ├── img
+│   ├── demo-moodle-backup.png
+│   ├── demo-moodle-cronjob.png
+│   ├── demo-moodle-install.png
+│   ├── demo-moodle-restore.png
+│   ├── demo-moodle-status.png
 │   └── m169-title.png
 ├── install.sh
 ├── LICENSE
@@ -158,6 +166,10 @@ Die gesamten Zusatztools, darunter eine Übersicht, Backup, Restore und der Cron
 moodle-status
 ```
 
+<div align="center">
+  <img src="https://github.com/JoSi-git/m169/blob/main/img/demo-moodle-status.png" />
+</div>
+
 ## 🏗️ 7 Backup und Restore
 
 > ⚠️ **Wichtig:**  
@@ -175,6 +187,9 @@ Die Backup-Funktion wurde so gestaltet, dass Backups mit einem kleinen Footprint
 ```bash
 moodle-backup
 ```
+<div align="center">
+  <img src="https://github.com/JoSi-git/m169/blob/main/img/demo-moodle-backup.png" />
+</div>
 
 #### Parameter für die Automatisierung
 
@@ -199,6 +214,9 @@ Für den Restore steht nur ein interaktives Menü zur Verfügung. Dieses listet 
 ```bash
 moodle-restore
 ```
+<div align="center">
+  <img src="https://github.com/JoSi-git/m169/blob/main/img/demo-moodle-restore.png" />
+</div>
 
 ### Cronjobs erstellen
 
@@ -208,6 +226,11 @@ Backups können ausserdem mithilfe des Linux-Tools `cron` automatisiert werden. 
 ```bash
 moodle-cronjob
 ```
+
+<div align="center">
+  <img src="https://github.com/JoSi-git/m169/blob/main/img/demo-moodle-cronjob.png" />
+</div>
+
 
 ##  📜 8 Funktion und Aufgaben des Scripts
 
