@@ -23,9 +23,9 @@ else
   exit 1
 fi
 
-SCHEDULE_FILE="./moodle-backup-schedule.json"
+SCHEDULE_FILE="$INSTALL_DIR/tools/moodle-backup/moodle-backup-schedule.json"
 CRON_COMMENT="# Moodle Docker Backup Scheduler"
-BACKUP_CMD="./moodle-backup.sh"
+BACKUP_CMD="$INSTALL_DIR/tools/moodle-backup/moodle-backup.sh"
 CRON_TMP=$(mktemp)
 
 # Map weekday names to cron weekday numbers

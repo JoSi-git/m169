@@ -80,7 +80,7 @@ echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *
 sudo apt update && sudo apt install gum
 
 # Installing jq
-sudo apt install
+sudo apt install jq -y
 
 # Creating required directories in $INSTALL_DIR
 print_cmsg "Creating required directories in $INSTALL_DIR..." | tee -a "$LOG_FILE"
