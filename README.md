@@ -244,12 +244,16 @@ Begleitend existieren zusätzliche Skripte für Backup, Restore und Statusabfrag
 Das zugehörige Flowchart ist zur besseren Übersicht in drei Funktionsbereiche gegliedert: System, Script und Docker.
 
 🖥️ **System:** Aktualisieren des Systems, Installation benötigter Pakete, Verwalten von Systemdiensten (Start, Stopp, Aktivierung)
+
 📜 **Script:** Verarbeiten von Benutzer- und Systemausgaben, Erstellen und Anpassen von Konfigurationsdateien, Strukturierter Ablauf mit Logging
+
 🐳 **Docker:** Starten vorbereiteter Container, Anwenden von docker-compose, Minimaler Eingriff in laufende Container
 
 <div align="center">
   <img src="https://github.com/JoSi-git/m169/blob/main/img/flowchart_install_process_p1.png" />
 </div>
+
+---
 
 <div align="center">
   <img src="https://github.com/JoSi-git/m169/blob/main/img/flowchart_install_process_p2.png" />
