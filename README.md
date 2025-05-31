@@ -65,6 +65,9 @@ Anschliessend kann das Installationsskript gestartet werden:
 │   ├── demo-moodle-install.png
 │   ├── demo-moodle-restore.png
 │   ├── demo-moodle-status.png
+│   ├── flowchart_install_process.drawio
+│   ├── flowchart_install_process_p1.png
+│   ├── flowchart_install_process_p2.png
 │   └── m169-title.png
 ├── install.sh
 ├── LICENSE
@@ -102,7 +105,6 @@ sich im Zielverzeichnis die vollständige Projektstruktur:
 │   ├── moodle
 │   └── moodle-backup
 │       └── 5.0_20250529-1634_FULL.tar.gz.log
-├── moodle-backup-schedule.json
 ├── php.ini
 └── tools
     ├── moodle-backup
@@ -234,7 +236,24 @@ moodle-cronjob
 
 ##  📜 8 Funktion und Aufgaben des Scripts
 
--
+Das Skript `install.sh` steuert zentral die gesamte Installation und Migration. Es legt die Struktur fest und automatisiert alle notwendigen Schritte für eine saubere Systemeinrichtung.
+
+Begleitend existieren zusätzliche Skripte für Backup, Restore und Statusabfragen, die nicht-funktionale Anforderungen abdecken. Diese werden hier nicht weiter behandelt.
+
+### Flowchart
+Das zugehörige Flowchart ist zur besseren Übersicht in drei Funktionsbereiche gegliedert: System, Script und Docker.
+
+🖥️ **System:** Aktualisieren des Systems, Installation benötigter Pakete, Verwalten von Systemdiensten (Start, Stopp, Aktivierung)
+📜 **Script:** Verarbeiten von Benutzer- und Systemausgaben, Erstellen und Anpassen von Konfigurationsdateien, Strukturierter Ablauf mit Logging
+🐳 **Docker:** Starten vorbereiteter Container, Anwenden von docker-compose, Minimaler Eingriff in laufende Container
+
+<div align="center">
+  <img src="https://github.com/JoSi-git/m169/blob/main/img/flowchart_install_process_p1.png" />
+</div>
+
+<div align="center">
+  <img src="https://github.com/JoSi-git/m169/blob/main/img/flowchart_install_process_p2.png" />
+</div>
 
 ## ❓ FAQ – Häufige Probleme und Lösungen
 
